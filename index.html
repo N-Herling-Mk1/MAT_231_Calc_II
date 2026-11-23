@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MAT 231 · Calculus II · Study Hub</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" href="assets/img/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body id="top">
+  <nav class="topnav" aria-label="Site">
+    <div class="wrap topnav-row">
+      <a class="home-btn" href="index.html" aria-current="page"><span aria-hidden="true">⌂</span> Home</a>
+      <span class="topnav-links">
+        <a href="#col-quizzes">Slide quizzes</a>
+        <a href="#col-slides">Slides</a>
+        <a href="#col-hw">Homework</a>
+        <a href="#col-review">Review</a>
+      </span>
+      <form class="searchbox" action="search.html" role="search">
+        <label class="sr-only" for="q">Search problems, quizzes and slides</label>
+        <input id="q" name="q" type="search" placeholder="search: ratio test, telescoping, #p-series…" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+      <a class="topnav-repo" href="https://github.com/N-Herling-Mk1/Fa_26_MAT_231" target="_blank" rel="noopener" title="Source repository on GitHub (new tab)">Repo ↗</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div class="sigil" aria-hidden="true">∑</div>
+      <div>
+        <div class="kicker">Pima CC · Fall 2026 · Study hub</div>
+        <h1>MAT 231 <b>//</b> Calculus II</h1>
+        <p class="lede">Lecture slides as handed out, a quiz generated from every deck, and the WebAssign homework transcribed with <b>blind</b>, <b>answers</b> and <b>worked-solution</b> views. Every problem, quiz question and slide page is searchable by keyword or tag.</p>
+        <div class="chapter-tabs"><span class="on">Ch. 11 · Sequences &amp; Series</span><span>more chapters as covered</span></div>
+        <div class="readout" id="readout">SYS //</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap columns">
+    <section class="col" id="col-quizzes">
+      <div class="col-head"><h2>Slide quizzes</h2><p id="quiz-count">one per deck · graded on the spot</p></div>
+      <div class="cards" id="quizzes"></div>
+    </section>
+    <section class="col c-slides" id="col-slides">
+      <div class="col-head"><h2>Slides</h2><p id="slide-count">as handed out · PDF</p></div>
+      <div class="cards" id="slides"></div>
+    </section>
+    <section class="col c-hw" id="col-hw">
+      <div class="col-head"><h2>Homework</h2><p id="hw-count">WebAssign · blind / answers / work</p></div>
+      <div class="cards" id="hw"></div>
+    </section>
+    <section class="col c-review" id="col-review">
+      <div class="col-head"><h2>Review &amp; handouts</h2><p>class quizzes, exam review, guides</p></div>
+      <div class="cards" id="review"></div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">MAT 231 study hub · static HTML/CSS/JS, no build step · math by KaTeX · progress is kept in this browser only (localStorage).</footer>
+
+  <script src="assets/js/slides.js"></script>
+  <script src="assets/js/manifest.js"></script>
+  <script>
+    const M = window.MANIFEST || { hw: [], quizzes: [] };
+    const SLIDES = window.SLIDE_DECKS || [];
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const tagLinks = (tags) => (tags || []).map((t) => `<a href="search.html?tag=${encodeURIComponent(t)}" title="Search everything tagged ${esc(t)}">#${esc(t)}</a>`).join("");
+    const newTab = (href, what) => `<a class="newtab" href="${href}" target="_blank" rel="noopener" title="Open ${esc(what)} in a new tab" aria-label="Open ${esc(what)} in a new tab">↗</a>`;
+    const read = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+
+    function quizProgress(id, total) {
+      const s = read("quiz-state:" + id);
+      if (!s || !s.answers) return 0;
+      const n = Object.values(s.answers).filter((a) => Array.isArray(a) ? a.length : a && typeof a === "object" ? Object.values(a).some(Boolean) : a !== null && a !== "").length;
+      return Math.min(n, total);
+    }
+    function hwProgress(id) {
+      const s = read("hw-state:" + id);
+      const m = s && s.marks ? Object.values(s.marks) : [];
+      return { ok: m.filter((x) => x === "ok").length, rv: m.filter((x) => x === "review").length };
+    }
+    function card(box, html, cls) { const c = document.createElement("div"); c.className = "card " + (cls || ""); c.innerHTML = html; document.getElementById(box).appendChild(c); }
+
+    const deckOf = (key) => SLIDES.find((d) => d.key === key);
+    // slide quizzes (generated from the decks)
+    M.quizzes.filter((q) => q.kind === "quiz").forEach((q) => {
+      const done = quizProgress(q.id, q.total), pct = Math.round((100 * done) / q.total);
+      const d = deckOf(q.deck);
+      card("quizzes", `<span class="chap-row"><span class="chap">${esc(q.sec)}</span>${d ? `<a class="dl" href="slides/viewer.html?d=${d.key}" title="Open the slides this quiz was built from">Slides →</a>` : ""}</span>
+        <span class="title">${esc(q.title)}</span><span class="topics">${tagLinks(q.topics)}</span>
+        <span class="meta">${q.total} questions</span>
+        ${done ? `<span class="prog"><i style="width:${pct}%"></i></span><span class="prog-text">${done} / ${q.total} answered</span>` : ""}
+        <span class="actions"><a class="go" href="${q.href}">${done ? (done === q.total ? "Review" : "Continue") : "Start quiz"} →</a>${newTab(q.href, q.sec + " quiz")}</span>`);
+    });
+    // slide decks, as is
+    SLIDES.filter((d) => d.kind === "deck").forEach((d) => {
+      const view = `slides/viewer.html?d=${d.key}`;
+      card("slides", `<span class="chap-row"><span class="chap">${esc(d.sec)}</span>${d.quiz ? `<a class="dl" href="${d.quiz}" title="Quiz generated from this deck">Quiz →</a>` : ""}</span>
+        <span class="title">${esc(d.title)}</span><span class="topics">${tagLinks(d.tags.slice(0, 6))}</span>
+        <span class="meta">${d.pages} pages${d.ans ? ` · answers version ${d.ansPages} pages` : ""}</span>
+        <span class="actions"><a class="go" href="${view}">View →</a>${newTab(view, d.sec + " slides")}
+          <a class="dl" href="slides/decks/${d.file}.pdf" target="_blank" rel="noopener" title="Open the PDF in a new tab">PDF</a>
+          ${d.ans ? `<a class="dl ans" href="${view}&v=ans" title="The version with answers filled in">Answers</a>` : ""}</span>`, "slide");
+    });
+    // homework
+    M.hw.forEach((h) => {
+      const p = hwProgress(h.id), n = h.problems;
+      card("hw", `<span class="chap-row"><span class="chap">${esc(h.sec)}</span>${h.deck ? `<a class="dl" href="slides/viewer.html?d=${h.deck}" title="This section's slides">Slides →</a>` : ""}</span>
+        <span class="title">${esc(h.title)}</span><span class="topics">${tagLinks(h.topics.slice(0, 6))}</span>
+        <span class="meta">${n} problems · ${h.slots} answer slots</span>
+        ${p.ok + p.rv ? `<span class="prog" style="display:flex"><i style="width:${(100 * p.ok) / n}%"></i><i style="width:${(100 * p.rv) / n}%;background:var(--amber);box-shadow:none"></i></span><span class="prog-text">${p.ok} got it · ${p.rv} to review</span>` : ""}
+        <span class="actions"><a class="go" href="${h.href}">${p.ok + p.rv ? "Continue" : "Open"} →</a>${newTab(h.href, "HW " + h.sec)}</span>`);
+    });
+    // review: class quizzes / exam review (quiz pages built from them) and handouts
+    SLIDES.filter((d) => d.kind !== "deck").forEach((d) => {
+      const view = `slides/viewer.html?d=${d.key}`;
+      const q = d.quiz && M.quizzes.find((x) => x.href === d.quiz);
+      const done = q ? quizProgress(q.id, q.total) : 0;
+      card("review", `<span class="chap-row"><span class="chap">${esc(d.sec)}</span><span class="meta">${d.kind === "review" ? "class quiz" : "handout"}</span></span>
+        <span class="title">${esc(d.title)}</span><span class="topics">${tagLinks(d.tags.slice(0, 5))}</span>
+        <span class="meta">${d.pages} pages${q ? ` · ${q.total}-question practice quiz` : ""}${done ? ` · ${done} answered` : ""}</span>
+        <span class="actions"><a class="go" href="${q ? q.href : view}">${q ? "Practice quiz" : "View"} →</a>
+          ${q ? `<a class="dl" href="${view}" title="The original PDF in the viewer">Slides</a>` : newTab(view, d.title)}
+          <a class="dl" href="slides/decks/${d.file}.pdf" target="_blank" rel="noopener" title="Open the PDF in a new tab">PDF</a></span>`);
+    });
+
+    const nq = M.quizzes.reduce((t, q) => t + q.total, 0), np = M.hw.reduce((t, h) => t + h.problems, 0);
+    const answered = M.quizzes.reduce((t, q) => t + quizProgress(q.id, q.total), 0);
+    const got = M.hw.reduce((t, h) => t + hwProgress(h.id).ok, 0);
+    document.getElementById("quiz-count").textContent = `${M.quizzes.filter((q) => q.kind === "quiz").length} quizzes · graded on the spot`;
+    document.getElementById("slide-count").textContent = `${SLIDES.filter((d) => d.kind === "deck").length} decks · ${SLIDES.reduce((t, d) => t + d.pages, 0)} pages · as handed out`;
+    document.getElementById("hw-count").textContent = `${M.hw.length} sets · ${np} problems · blind / answers / work`;
+    document.getElementById("readout").textContent = `SYS // ${M.quizzes.length} quizzes · ${nq} questions · ${answered} answered here · ${M.hw.length} homework sets · ${np} problems · ${got} marked got-it · ${SLIDES.length} PDFs`;
+  </script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+/* Quiz engine (from the CHEM 181 hub; MAT 231 adds tags, slide-page links, $$ display math, #qN deep links): renders window.QUIZ, grades immediately, explains every option
+ * in the side panel. Reused by every quiz page in this repo. */
+(function () {
+  "use strict";
+  const QZ = window.QUIZ;
+  const $ = (s, el = document) => el.querySelector(s);
+  const el = (tag, attrs = {}, html) => {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") e.className = v; else if (k in e && k !== "list") e[k] = v; else e.setAttribute(k, v);
+    }
+    if (html !== undefined) e.innerHTML = html;
+    return e;
+  };
+  const fmt = (x) => (Math.round(x * 100) / 100).toFixed(2).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1");
+  const isPhoto = (q) => !!q.photos;
+  // pending: a question whose answer is not known yet (homework part not worked/unlocked).
+  // It is shown with its prompt but is not answerable, not graded and not counted.
+  const LIVE = QZ.questions.filter((q) => !q.pending);
+
+  // ---------------- state (persisted per quiz in localStorage) ----------------
+  const KEY = "quiz-state:" + QZ.id;
+  let state = { answers: {}, graded: {}, peek: {}, current: 1 };
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.answers) state = Object.assign(state, s); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+  const answerOf = (q) => {
+    const a = state.answers[q.n];
+    if (q.type === "multi") return Array.isArray(a) ? a : [];
+    if (q.type === "match") return a && typeof a === "object" ? a : {};
+    if (q.type === "numeric") return typeof a === "string" ? a : "";
+    return typeof a === "number" ? a : null;
+  };
+  const isAnswered = (q) => {
+    if (q.pending) return false;
+    const a = answerOf(q);
+    if (q.type === "multi") return a.length > 0;
+    if (q.type === "match") return q.items.some((_, i) => a[i]);
+    if (q.type === "numeric") return a.trim() !== "";
+    return a !== null;
+  };
+
+  // numeric answers: accepts 1.5, -217, +222, 3/2, "1 1/2", unicode minus,
+  // and scientific notation 4.75e4, 4.75E4, 4.75x10^4, 4.75×10^-4, 4.75*10^(4)
+  function parseNum(str) {
+    let t = String(str).trim().replace(/[\u2212\u2013]/g, "-").replace(/,/g, "").replace(/\s*(kJ\/mol|kJ|electrons?|D|Å)\s*$/i, "");
+    t = t.replace(/\s*[x×*·]\s*10\s*\^\s*\(?\s*([+-]?\d+)\s*\)?$/i, "e$1");
+    let m = t.match(/^([+-]?)\s*(\d+)\s+(\d+)\/(\d+)$/);
+    if (m) return (m[1] === "-" ? -1 : 1) * (Number(m[2]) + Number(m[3]) / Number(m[4]));
+    m = t.match(/^([+-]?\d*\.?\d+)\/(\d*\.?\d+)$/);
+    if (m) return Number(m[1]) / Number(m[2]);
+    if (t !== "" && isFinite(Number(t))) return Number(t);
+    return evalExpr(t);
+  }
+  // MAT 231: typed answers may be expressions — 5/7, ln(3), sqrt(2)/2, pi/4, e^-2, 3^(1/2), 2pi
+  function evalExpr(t) {
+    let x = t.toLowerCase().replace(/\s+/g, "").replace(/π/g, "pi").replace(/√/g, "sqrt");
+    if (!x || !/^[0-9.+\-*/^()a-z]+$/.test(x)) return NaN;
+    const words = x.match(/[a-z]+/g) || [];
+    const ok = ["pi", "e", "ln", "log", "sqrt", "exp", "sin", "cos", "tan", "arctan", "atan"];
+    if (words.some((w) => !ok.includes(w))) return NaN;
+    x = x.replace(/(\d|\))(?=[a-z(])/g, "$1*").replace(/\)(?=\d)/g, ")*")
+      .replace(/arctan|atan/g, "M.atan").replace(/\bln\b|\blog\b/g, "M.log").replace(/sqrt/g, "M.sqrt")
+      .replace(/exp/g, "M.exp").replace(/(?<![a-z.])(sin|cos|tan)/g, "M.$1")
+      .replace(/\bpi\b/g, "M.PI").replace(/(?<![a-z.])e(?![a-z])/g, "M.E").replace(/\^/g, "**");
+    try { const v = Function("M", `"use strict";return (${x});`)(Math); return typeof v === "number" ? v : NaN; } catch (e) { return NaN; }
+  }
+  // tol = absolute tolerance; rtol = relative tolerance (e.g. 0.01 = ±1%, for sig-fig answers)
+  const tolOf = (q) => (q.rtol ? q.rtol * Math.abs(q.answer) : (q.tol ?? 1e-9));
+  const numOk = (q) => { const x = parseNum(answerOf(q)); return isFinite(x) && Math.abs(x - q.answer) <= tolOf(q) + 1e-9; };
+
+  // ---------------- scoring ----------------
+  // multi: right-minus-wrong over all options, floored at 0 (matches the original quiz's scores)
+  function score(q) {
+    if (!isAnswered(q)) return 0;          // unanswered questions earn nothing
+    const a = answerOf(q);
+    if (q.type === "single") return a !== null && q.options[a].correct ? q.points : 0;
+    if (q.type === "numeric") return numOk(q) ? q.points : 0;
+    if (q.type === "match") {
+      const right = q.items.filter((it, i) => a[i] === it.answer).length;
+      return (q.points * right) / q.items.length;
+    }
+    const n = q.options.length;
+    let right = 0;
+    q.options.forEach((o, i) => { if (a.includes(i) === !!o.correct) right++; });
+    const wrong = n - right;
+    return Math.max(0, (q.points * (right - wrong)) / n);
+  }
+  const verdict = (q) => {
+    const s = score(q);
+    return s >= q.points - 1e-9 ? "ok" : s > 1e-9 ? "part" : "bad";
+  };
+
+  // ---------------- rendering ----------------
+  const quizEl = $("#quiz");
+  const cards = {};
+
+  function renderIntro() {
+    const box = el("div", { class: "intro" });
+    const nPend = QZ.questions.length - LIVE.length;
+    box.innerHTML = `<p><strong>${QZ.course}</strong> · ${LIVE.length} ${QZ.unitName || "questions"} · ${fmt(LIVE.filter(q => !q.bonus).reduce((t, q) => t + q.points, 0))} points${LIVE.some(q => q.bonus) ? " + bonus" : ""}${nPend ? ` · ${nPend} pending (answer not available yet, not counted)` : ""}.</p>
+      <p>Answer, then press <strong>Check</strong> on any question (or <strong>Grade all</strong>) for immediate grading. The panel explains why each option is right or wrong.</p>
+      <p>${QZ.scoring}</p>${QZ.toolsNote ? `<p>${QZ.toolsNote}</p>` : ""}${QZ.introNote ? `<p>${QZ.introNote}</p>` : ""}`;
+    quizEl.appendChild(box);
+  }
+
+  function renderQuestion(q) {
+    const card = el("section", { class: "q", id: "q" + q.n, "aria-labelledby": "qh" + q.n });
+    const title = q.title || `Question ${q.n}`;
+    const ptsLabel = `${fmt(q.points)} point${q.points === 1 ? "" : "s"}`;
+    card.innerHTML = `<div class="q-head"><h2 id="qh${q.n}">${title} <span class="pts">(${q.pending ? "pending" : ptsLabel})</span></h2>${q.unlock ? `<span class="unlock" title="Unlock part">★ Unlock</span>` : ""}${q.src ? (q.page && (q.deck || QZ.deck) ? `<a class="src" href="${QZ.root || "../../"}slides/viewer.html?d=${q.deck || QZ.deck}${q.ans ? "&v=ans" : ""}#page=${q.page}" target="_blank" rel="noopener" title="Open this slide in a new tab">${q.src} ↗</a>` : `<span class="src">${q.src}</span>`) : ""}${q.tags ? `<span class="tags">${q.tags.map((t) => `<a class="tag" href="${QZ.root || "../../"}search.html?tag=${encodeURIComponent(t)}" title="Search the site for this tag">#${t}</a>`).join("")}</span>` : ""}<span class="status"></span></div>`;
+    if (q.pending) card.classList.add("pending");
+    const body = el("div", { class: "q-body" });
+    body.appendChild(el("div", { class: "prompt" }, q.prompt));
+    if (q.figure) {
+      const f = el("div", { class: "figure" });
+      f.appendChild(el("img", { src: q.figure.img, alt: q.figure.alt || "", loading: "lazy" }));
+      body.appendChild(f);
+    }
+    if (q.prompt2) body.appendChild(el("div", { class: "prompt" }, q.prompt2));
+    (q.refs || []).forEach((key) => {
+      const r = (QZ.refs || {})[key];
+      if (!r) return;
+      const d = el("details", { class: "ref" });
+      d.appendChild(el("summary", {}, r.label));
+      d.appendChild(el("img", { src: r.img, alt: r.alt || r.label, loading: "lazy" }));
+      body.appendChild(d);
+    });
+
+    if (q.pending) {
+      body.appendChild(el("div", { class: "pending-box" }, `<strong>Answer pending.</strong> ${q.pendingNote || "Fill in the answer once this part has been worked."}`));
+      card.appendChild(body);
+      card.addEventListener("click", () => setCurrent(q.n, false));
+      quizEl.appendChild(card);
+      cards[q.n] = card;
+      refresh(q);
+      return;
+    }
+    if (q.type === "numeric") {
+      const wrap = el("div", { class: "numeric" });
+      const inp = el("input", { type: "text", inputmode: "decimal", autocomplete: "off", spellcheck: false, "aria-label": "Answer" });
+      inp.value = answerOf(q);
+      inp.addEventListener("input", () => { state.answers[q.n] = inp.value; ungrade(q); save(); refresh(q); });
+      inp.addEventListener("keydown", (ev) => { if (ev.key === "Enter") { grade(q); setCurrent(q.n, false); } });
+      wrap.appendChild(inp);
+      if (q.unit) wrap.appendChild(el("span", { class: "unit" }, q.unit));
+      body.appendChild(wrap);
+    } else if (q.type === "match") {
+      const grid = el("div", { class: "match" });
+      const a = answerOf(q);
+      q.items.forEach((it, i) => {
+        const sel = el("select", { "aria-label": it.label });
+        sel.appendChild(el("option", { value: "" }, "--"));
+        q.choices.forEach((c) => sel.appendChild(el("option", { value: c }, c)));
+        sel.value = a[i] || "";
+        sel.addEventListener("change", () => {
+          const cur = Object.assign({}, answerOf(q)); cur[i] = sel.value; state.answers[q.n] = cur;
+          ungrade(q); save(); refresh(q);
+        });
+        grid.appendChild(sel);
+        grid.appendChild(el("div", {}, it.label));
+      });
+      body.appendChild(grid);
+      const list = el("ol", { class: "match-choices" });
+      q.choices.forEach((c) => list.appendChild(el("li", {}, c)));
+      body.appendChild(list);
+    } else {
+      const ul = el("ul", { class: "opts", role: q.type === "single" ? "radiogroup" : "group" });
+      q.options.forEach((o, i) => {
+        const li = el("li", { class: "opt" });
+        const id = `q${q.n}o${i}`;
+        const input = el("input", { type: q.type === "single" ? "radio" : "checkbox", name: "q" + q.n, id, value: i });
+        const label = el("label", { htmlFor: id });
+        if (o.img) {
+          const img = el("img", { src: o.img, alt: o.alt || "", loading: "lazy" });
+          if (isPhoto(q)) img.className = "photo";
+          label.appendChild(img);
+        } else {
+          label.appendChild(el("span", { class: "otext" }, o.text));
+        }
+        input.addEventListener("change", () => {
+          if (q.type === "single") state.answers[q.n] = i;
+          else {
+            const cur = new Set(answerOf(q));
+            input.checked ? cur.add(i) : cur.delete(i);
+            state.answers[q.n] = [...cur].sort((x, y) => x - y);
+          }
+          ungrade(q); save(); refresh(q);
+        });
+        li.append(input, label, el("span", { class: "mark", "aria-hidden": "true" }));
+        ul.appendChild(li);
+      });
+      body.appendChild(ul);
+    }
+
+    const foot = el("div", { class: "q-foot" });
+    const check = el("button", { class: "btn small primary", type: "button" }, "Check");
+    check.addEventListener("click", () => { grade(q); setCurrent(q.n, true); });
+    const explain = el("button", { class: "btn small", type: "button" }, "Explain");
+    explain.addEventListener("click", () => { setCurrent(q.n, true); openPanel(); });
+    foot.append(check, explain, el("span", { class: "result", "aria-live": "polite" }));
+    body.appendChild(foot);
+    card.appendChild(body);
+    card.addEventListener("click", (ev) => { if (!ev.target.closest("button")) setCurrent(q.n, false); });
+    quizEl.appendChild(card);
+    cards[q.n] = card;
+    refresh(q);
+  }
+
+  function refresh(q) {
+    const card = cards[q.n];
+    if (q.pending) {
+      $(".status", card).textContent = "Pending";
+      updateTop();
+      if (state.current === q.n) renderPanel(); else updateMap();
+      return;
+    }
+    const a = answerOf(q);
+    const graded = !!state.graded[q.n];
+    card.classList.toggle("graded", graded);
+    if (q.type === "numeric") {
+      const inp = card.querySelector(".numeric input");
+      if (document.activeElement !== inp) inp.value = a;
+      inp.classList.toggle("right", graded && numOk(q));
+      inp.classList.toggle("wrong", graded && !numOk(q));
+    } else if (q.type === "match") {
+      card.querySelectorAll("select").forEach((s, i) => {
+        s.value = a[i] || "";
+        s.classList.toggle("right", graded && a[i] === q.items[i].answer);
+        s.classList.toggle("wrong", graded && a[i] !== q.items[i].answer);
+      });
+    } else {
+      card.querySelectorAll(".opt").forEach((li, i) => {
+        const chosen = q.type === "multi" ? a.includes(i) : a === i;
+        li.querySelector("input").checked = chosen;
+        li.classList.toggle("sel", chosen);
+        const o = q.options[i];
+        const ok = chosen === !!o.correct;
+        li.classList.toggle("keyed", graded && !!o.correct);
+        li.classList.toggle("right", graded && chosen && ok);
+        li.classList.toggle("wrong", graded && !ok);
+      });
+    }
+    const status = $(".status", card);
+    const res = $(".result", card);
+    status.className = "status";
+    res.className = "result";
+    if (graded) {
+      const v = verdict(q);
+      status.textContent = v === "ok" ? "Correct" : v === "part" ? "Partially correct" : "Incorrect";
+      status.classList.add(v);
+      res.textContent = `Score: ${fmt(score(q))} / ${fmt(q.points)}`;
+      res.classList.add("show", v);
+    } else {
+      status.textContent = isAnswered(q) ? "Saved" : "";
+    }
+    updateTop();
+    if (state.current === q.n) renderPanel();
+    else updateMap();
+  }
+
+  // ---------------- grading ----------------
+  function grade(q) { state.graded[q.n] = true; save(); refresh(q); }
+  function ungrade(q) { if (state.graded[q.n]) { delete state.graded[q.n]; } }
+  function gradeAll() {
+    LIVE.forEach((q) => { state.graded[q.n] = true; });
+    save(); QZ.questions.forEach(refresh); renderPanel();
+  }
+  function resetAll() {
+    if (!confirmReset()) return;
+    state = { answers: {}, graded: {}, peek: {}, current: 1 };
+    save(); QZ.questions.forEach(refresh); setCurrent(1, true);
+  }
+  // inline two-step confirm instead of window.confirm (no blocking dialogs)
+  let resetArmed = 0;
+  function confirmReset() {
+    const b = $("#btn-reset");
+    if (Date.now() - resetArmed < 3000) { b.textContent = "Reset"; resetArmed = 0; return true; }
+    resetArmed = Date.now(); b.textContent = "Click again to reset";
+    setTimeout(() => { if (resetArmed && Date.now() - resetArmed >= 3000) { b.textContent = "Reset"; resetArmed = 0; } }, 3100);
+    return false;
+  }
+
+  function updateTop() {
+    const qs = LIVE;
+    const answered = qs.filter(isAnswered).length;
+    $("#prog-text").textContent = `${answered} / ${qs.length} answered`;
+    $("#prog-bar").style.width = (100 * answered) / qs.length + "%";
+    const gradedQs = qs.filter((q) => state.graded[q.n]);
+    const box = $("#scorebox");
+    if (!gradedQs.length) { box.textContent = "Not graded"; box.classList.remove("done"); return; }
+    const total = qs.filter((q) => !q.bonus).reduce((t, q) => t + q.points, 0);
+    const got = gradedQs.reduce((t, q) => t + score(q), 0);
+    const all = gradedQs.length === qs.length;
+    box.textContent = `${all ? "Score" : "Graded so far"}: ${fmt(got)} / ${fmt(total)}` + (all ? ` (${Math.round((100 * got) / total)}%)` : ` · ${gradedQs.length} checked`);
+    box.classList.toggle("done", all);
+  }
+
+  // ---------------- side panel ----------------
+  const panel = $("#panel");
+  const pbody = $("#panel-body");
+  function updateMap() {
+    const map = $("#qmap");
+    if (!map.childElementCount) {
+      QZ.questions.forEach((q) => {
+        const b = el("button", { type: "button", title: (q.title || `Question ${q.n}`) + (q.pending ? " (pending)" : "") }, q.mapLabel || (q.bonus ? "B" : String(q.n)));
+        b.addEventListener("click", () => setCurrent(q.n, true));
+        map.appendChild(b);
+      });
+    }
+    [...map.children].forEach((b, i) => {
+      const q = QZ.questions[i];
+      b.className = "";
+      if (q.pending) b.classList.add("pending");
+      else if (state.graded[q.n]) b.classList.add(verdict(q));
+      else if (isAnswered(q)) b.classList.add("answered");
+      if (state.current === q.n) b.classList.add("current");
+    });
+  }
+
+  function optLabel(q, o) {
+    if (o.img) return `<img src="${o.img}" alt="${(o.alt || "").replace(/"/g, "&quot;")}"${isPhoto(q) ? ' class="photo"' : ""}>`;
+    return o.text;
+  }
+
+  function renderPanel() {
+    updateMap();
+    const q = QZ.questions.find((x) => x.n === state.current) || QZ.questions[0];
+    const graded = !!state.graded[q.n];
+    const peek = !!state.peek[q.n];
+    let h = `<h4>${q.title || "Question " + q.n}</h4>`;
+    if (q.pending) {
+      h += `<div class="panel-empty"><p><strong>Answer pending.</strong> ${q.pendingNote || "Not available yet."}</p></div>`;
+      if (q.note) h += `<div class="note">${q.note}</div>`;
+    } else if (!graded && !peek) {
+      h += `<div class="panel-empty"><p>Not checked yet. Check the question to grade it and see why each option is right or wrong, or peek at the explanation without grading.</p>
+        <div class="btns"><button class="btn small primary" data-act="check">Check this question</button><button class="btn small" data-act="peek">Peek</button></div></div>`;
+    } else {
+      const a = answerOf(q);
+      h += graded
+        ? `<div class="sub">Score ${fmt(score(q))} / ${fmt(q.points)}${q.bonus ? " (bonus)" : ""} · ${q.type === "multi" ? "right-minus-wrong per option" : q.type === "match" ? "per item" : q.type === "numeric" ? (q.rtol ? `numeric, ±${fmt(q.rtol * 100)}% accepted` : q.tol ? `numeric, ±${q.tol} accepted` : "numeric, exact") : "all or nothing"}</div>`
+        : `<div class="sub">Peeking: answer key shown, not graded.</div>`;
+      if (q.type === "numeric") {
+        const ok = numOk(q);
+        const cls = graded ? (ok ? "right" : "wrong") : "peek";
+        h += `<div class="ex ${cls}"><div class="what"><strong>Answer:</strong> ${q.answerText || q.answer}${q.unit ? " " + q.unit : ""}</div>
+          <div class="chips">${graded ? `<span class="chip">You: ${a.trim() ? a.replace(/</g, "&lt;") : "—"}</span><span class="chip ${ok ? "v-right" : "v-wrong"}">${ok ? "✓ right" : "✗ wrong"}</span>` : ""}</div>
+          <div class="why">${q.why || ""}</div></div>`;
+      } else if (q.type === "match") {
+        q.items.forEach((it, i) => {
+          const ok = a[i] === it.answer;
+          const cls = graded ? (ok ? "right" : "wrong") : "peek";
+          const unit = q.unit ? " " + q.unit + (it.answer === "1" ? "" : "s") : "";
+          h += `<div class="ex ${cls}"><div class="what"><strong>${it.label}</strong> → ${it.answer}${unit}</div>
+            <div class="chips">${graded ? `<span class="chip">You: ${a[i] || "—"}</span><span class="chip ${ok ? "v-right" : "v-wrong"}">${ok ? "✓ right" : "✗ wrong"}</span>` : ""}</div>
+            <div class="why">${it.why}</div></div>`;
+        });
+      } else {
+        q.options.forEach((o, i) => {
+          const chosen = q.type === "multi" ? a.includes(i) : a === i;
+          const ok = chosen === !!o.correct;
+          const cls = graded ? (ok ? "right" : "wrong") : "peek";
+          const keyChip = q.type === "multi"
+            ? (o.correct ? `<span class="chip key-yes">Key: select</span>` : `<span class="chip key-no">Key: leave blank</span>`)
+            : (o.correct ? `<span class="chip key-yes">Correct answer</span>` : `<span class="chip key-no">Incorrect</span>`);
+          const youChip = graded ? `<span class="chip">You: ${chosen ? "selected" : "not selected"}</span><span class="chip ${ok ? "v-right" : "v-wrong"}">${ok ? "✓ right" : "✗ wrong"}</span>` : "";
+          h += `<div class="ex ${cls}"><div class="what">${optLabel(q, o)}</div><div class="chips">${keyChip}${youChip}</div><div class="why">${o.why}</div></div>`;
+        });
+      }
+      if (q.note) h += `<div class="note">${q.note}</div>`;
+    }
+    const idx = QZ.questions.indexOf(q);
+    h += `<div class="panel-nav"><button class="btn small" data-act="prev" ${idx === 0 ? "disabled" : ""}>◀ Previous</button><button class="btn small" data-act="goto">Go to question</button><button class="btn small" data-act="next" ${idx === QZ.questions.length - 1 ? "disabled" : ""}>Next ▶</button></div>`;
+    pbody.innerHTML = h;
+    typeset(pbody);
+  }
+
+  pbody.addEventListener("click", (ev) => {
+    const b = ev.target.closest("button[data-act]");
+    if (!b) return;
+    const q = QZ.questions.find((x) => x.n === state.current);
+    const idx = QZ.questions.indexOf(q);
+    const act = b.dataset.act;
+    if (act === "check") grade(q);
+    else if (act === "peek") { state.peek[q.n] = true; save(); renderPanel(); }
+    else if (act === "prev") setCurrent(QZ.questions[idx - 1].n, true);
+    else if (act === "next") setCurrent(QZ.questions[idx + 1].n, true);
+    else if (act === "goto") { cards[q.n].scrollIntoView({ block: "start" }); closePanelMobile(); }
+  });
+
+  function setCurrent(n, scroll) {
+    const prev = state.current;
+    state.current = n; save();
+    if (cards[prev]) cards[prev].classList.remove("active");
+    cards[n].classList.add("active");
+    renderPanel();
+    if (scroll && window.matchMedia("(min-width: 1001px)").matches) cards[n].scrollIntoView({ block: "start" });
+    panel.scrollTop = 0;
+  }
+
+  const openPanel = () => panel.classList.add("open");
+  const closePanelMobile = () => panel.classList.remove("open");
+
+  function typeset(root) {
+    if (window.renderMathInElement) {
+      try {
+        window.renderMathInElement(root, {
+          delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
+          throwOnError: false,
+        });
+      } catch (e) {}
+    }
+  }
+
+  // ---------------- boot ----------------
+  document.title = `${QZ.title} · ${QZ.course}`;
+  $("#quiz-title").textContent = QZ.short ? `${QZ.sec} · ${QZ.short}` : QZ.title;
+  $("#quiz-title").title = QZ.title;
+  renderIntro();
+  QZ.questions.forEach(renderQuestion);
+  $("#btn-grade").addEventListener("click", gradeAll);
+  $("#btn-reset").addEventListener("click", resetAll);
+  $("#btn-panel").addEventListener("click", () => panel.classList.toggle("open"));
+  $("#btn-close-panel").addEventListener("click", closePanelMobile);
+  typeset(quizEl);
+  // deep link: #q12 (from the search page) jumps to that question
+  const hm = location.hash.match(/^#q(\d+)$/);
+  const deep = hm && QZ.questions.find((x) => x.n === Number(hm[1]));
+  setCurrent(deep ? deep.n : (state.current || 1), false);
+  if (deep) { cards[deep.n].scrollIntoView({ block: "start" }); cards[deep.n].classList.add("flash"); }
+  updateTop();
+})();
