@@ -1,14 +1,14 @@
 # MAT 231 Study Hub — Calculus II
 
 <p align="center">
-  <a href="https://n-herling-mk1.github.io/Fa_26_MAT_231/" target="_blank" rel="noopener">
+  <a href="https://n-herling-mk1.github.io/MAT_231_Calc_II/" target="_blank" rel="noopener">
     <img src="assets/img/site-preview.png" alt="MAT 231 Study Hub: top nav with Home button and search box, and columns of slide quizzes, slide decks, homework and review" width="100%">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://n-herling-mk1.github.io/Fa_26_MAT_231/" target="_blank" rel="noopener"><b>▶ Open the live site ↗</b></a>
-  &nbsp;·&nbsp; https://n-herling-mk1.github.io/Fa_26_MAT_231/
+  <a href="https://n-herling-mk1.github.io/MAT_231_Calc_II/" target="_blank" rel="noopener"><b>▶ Open the live site ↗</b></a>
+  &nbsp;·&nbsp; https://n-herling-mk1.github.io/MAT_231_Calc_II/
 </p>
 
 Static study site for MAT 231 (Calculus II, Pima CC, Fall 2026). It has a navigation hub, the lecture slides as handed out, a quiz built from every deck, the WebAssign homework with **blind / answers / work** views, and a search page that finds problems, quiz questions and slide pages by keyword or tag. It is plain HTML, CSS and JavaScript with no build step, and it works opened straight from disk (`file://`) or served by GitHub Pages. The theme is TRON light: a white field, Orbitron and Share Tech Mono type, and cyan, violet, green and amber accents.
