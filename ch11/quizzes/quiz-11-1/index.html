@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiz · MAT 231</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../../assets/img/favicon-32.png">
+  <link rel="icon" href="../../../assets/img/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="../../../assets/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="../../../assets/css/quiz.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="home-btn" href="../../index.html" title="Back to this chapter's hub"><span aria-hidden="true">⌂</span> Home</a>
+    <a class="btn" id="deck-link" target="_blank" rel="noopener" hidden>Slides ↗</a>
+    <a class="btn" id="hw-link" hidden>Homework →</a>
+    <h1 id="quiz-title">Quiz</h1>
+    <div class="progress" aria-label="Progress">
+      <div class="bar"><span id="prog-bar"></span></div>
+      <span id="prog-text">0 answered</span>
+    </div>
+    <div class="spacer"></div>
+    <span class="scorebox" id="scorebox" aria-live="polite">Not graded</span>
+    <button class="btn primary" id="btn-grade" type="button">Grade all</button>
+    <button class="btn" id="btn-reset" type="button">Reset</button>
+    <a class="btn" href="../../../search.html" title="Search problems, quizzes and slides">Search</a>
+    <button class="btn panel-toggle" id="btn-panel" type="button">Explanations</button>
+  </header>
+
+  <main class="layout">
+    <section class="quiz" id="quiz" aria-label="Questions"></section>
+    <aside class="panel" id="panel" aria-label="Explanations">
+      <div class="panel-head">
+        <div class="row">
+          <h3>Explanations</h3>
+          <button class="btn small panel-toggle" id="btn-close-panel" type="button">Close</button>
+        </div>
+        <div class="qmap" id="qmap" aria-label="Question map"></div>
+        <div class="legend">
+          <span><i style="background:#fff"></i>unanswered</span>
+          <span><i style="background:#eef3f8"></i>answered</span>
+          <span><i style="background:#e9f6ec"></i>correct</span>
+          <span><i style="background:#fff6e0"></i>partial</span>
+          <span><i style="background:#fdeceb"></i>incorrect</span>
+        </div>
+      </div>
+      <div class="panel-body" id="panel-body" aria-live="polite"></div>
+    </aside>
+  </main>
+
+  <script src="../../../assets/vendor/katex/katex.min.js"></script>
+  <script src="../../../assets/vendor/katex/contrib/auto-render.min.js"></script>
+  <script src="data.js"></script>
+  <script>
+    // links to this quiz's slide deck and homework set (from QUIZ.deck / QUIZ.hw)
+    (function () {
+      const Q = window.QUIZ, d = document.getElementById("deck-link"), h = document.getElementById("hw-link");
+      if (Q.deck) { d.href = `../../../viewer.html?d=${Q.deck}`; d.textContent = `${Q.deckLabel || Q.sec + " slides"} ↗`; d.hidden = false; }
+      if (Q.hw) { h.href = "../../" + Q.hw; h.hidden = false; }
+    })();
+  </script>
+  <script src="../../../assets/js/quiz-engine.js"></script>
+</body>
+</html>

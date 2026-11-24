@@ -108,7 +108,7 @@
     const card = el("section", { class: "q", id: "q" + q.n, "aria-labelledby": "qh" + q.n });
     const title = q.title || `Question ${q.n}`;
     const ptsLabel = `${fmt(q.points)} point${q.points === 1 ? "" : "s"}`;
-    card.innerHTML = `<div class="q-head"><h2 id="qh${q.n}">${title} <span class="pts">(${q.pending ? "pending" : ptsLabel})</span></h2>${q.unlock ? `<span class="unlock" title="Unlock part">★ Unlock</span>` : ""}${q.src ? (q.page && (q.deck || QZ.deck) ? `<a class="src" href="${QZ.root || "../../"}slides/viewer.html?d=${q.deck || QZ.deck}${q.ans ? "&v=ans" : ""}#page=${q.page}" target="_blank" rel="noopener" title="Open this slide in a new tab">${q.src} ↗</a>` : `<span class="src">${q.src}</span>`) : ""}${q.tags ? `<span class="tags">${q.tags.map((t) => `<a class="tag" href="${QZ.root || "../../"}search.html?tag=${encodeURIComponent(t)}" title="Search the site for this tag">#${t}</a>`).join("")}</span>` : ""}<span class="status"></span></div>`;
+    card.innerHTML = `<div class="q-head"><h2 id="qh${q.n}">${title} <span class="pts">(${q.pending ? "pending" : ptsLabel})</span></h2>${q.unlock ? `<span class="unlock" title="Unlock part">★ Unlock</span>` : ""}${q.src ? (q.page && (q.deck || QZ.deck) ? `<a class="src" href="${QZ.root || "../../../"}viewer.html?d=${q.deck || QZ.deck}${q.ans ? "&v=ans" : ""}#page=${q.page}" target="_blank" rel="noopener" title="Open this slide in a new tab">${q.src} ↗</a>` : `<span class="src">${q.src}</span>`) : ""}${q.tags ? `<span class="tags">${q.tags.map((t) => `<a class="tag" href="${QZ.root || "../../../"}search.html?tag=${encodeURIComponent(t)}" title="Search the site for this tag">#${t}</a>`).join("")}</span>` : ""}<span class="status"></span></div>`;
     if (q.pending) card.classList.add("pending");
     const body = el("div", { class: "q-body" });
     body.appendChild(el("div", { class: "prompt" }, q.prompt));
@@ -429,4 +429,10 @@
   setCurrent(deep ? deep.n : (state.current || 1), false);
   if (deep) { cards[deep.n].scrollIntoView({ block: "start" }); cards[deep.n].classList.add("flash"); }
   updateTop();
+})();
+
+// Chapter label on the home button: pages live in ch<N>/..., and "Home" leads back to that chapter's hub.
+(function () {
+  const m = location.pathname.match(/\/ch(\d+)\//), hb = document.querySelector(".home-btn");
+  if (m && hb && hb.lastChild && hb.lastChild.nodeType === 3) hb.lastChild.textContent = " Ch. " + m[1];
 })();

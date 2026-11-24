@@ -13,7 +13,7 @@
   <nav class="topnav" aria-label="Site">
     <div class="wrap topnav-row">
       <a class="home-btn" href="index.html"><span aria-hidden="true">⌂</span> Home</a>
-      <span class="topnav-links"><a href="index.html#col-quizzes">Slide quizzes</a><a href="index.html#col-slides">Slides</a><a href="index.html#col-hw">Homework</a><a href="index.html#col-review">Review</a></span>
+      <span class="topnav-links" id="nav-chapters"></span>
     </div>
   </nav>
   <main class="wrap">
@@ -25,6 +25,7 @@
         <button type="submit">Search</button>
       </form>
       <div class="filters" id="types"><span class="lbl">Show</span></div>
+      <div class="filters"><span class="lbl">Chapter</span><span id="chs" style="display:contents"></span></div>
       <div class="filters"><span class="lbl">Section</span><span id="secs" style="display:contents"></span></div>
       <div class="filters"><span class="lbl">Tags</span><span class="lbl" style="text-transform:none" id="taghint">click to filter (several tags = all of them)</span></div>
       <div class="tagcloud" id="tags"></div>
@@ -35,23 +36,26 @@
 
   <script src="assets/vendor/katex/katex.min.js"></script>
   <script src="assets/vendor/katex/contrib/auto-render.min.js"></script>
+  <script src="assets/js/chapters.js"></script>
   <script src="assets/js/slides.js"></script>
   <script src="assets/js/slide-text.js"></script>
   <script src="assets/js/manifest.js"></script>
   <script>
   /* Search over four kinds of item, all built in the browser (works from file:// — no fetch):
-       hw    — one per homework problem   (hw/<set>/data.js, loaded with <script> tags)
-       quiz  — one per quiz question      (quizzes/<quiz>/data.js)
-       deck  — one per PDF                (assets/js/slides.js: hand tags)
+       hw    — one per homework problem   (ch<N>/hw/<set>/data.js, loaded with <script> tags)
+       quiz  — one per quiz question      (ch<N>/quizzes/<quiz>/data.js)
+       deck  — one per PDF                (assets/js/slides.js: hand tags; decks, handouts, problem sets)
        slide — one per PDF page           (assets/js/slide-text.js: extracted text)
-     Keywords must all appear (title, text or tags). Tags are the hand-added labels; a tag filter
-     keeps only items carrying every selected tag. URL: search.html?q=…&tag=a,b&type=hw&sec=11.3 */
+     Every item carries its chapter. Keywords must all appear (title, text or tags). Tags are the hand-added labels;
+     a tag filter keeps only items carrying every selected tag. URL: search.html?q=…&tag=a,b&type=hw&ch=11&sec=11.3 */
   (function () {
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    const TYPES = [["all", "All"], ["hw", "Homework"], ["quiz", "Quiz questions"], ["deck", "Slide decks"], ["slide", "Slide pages"]];
+    const TYPES = [["all", "All"], ["hw", "Homework"], ["quiz", "Quiz questions"], ["deck", "PDFs"], ["slide", "Slide pages"]];
     const params = new URLSearchParams(location.search);
-    const st = { q: params.get("q") || "", tags: (params.get("tag") || "").split(",").filter(Boolean), type: params.get("type") || "all", sec: params.get("sec") || "all" };
+    const st = { q: params.get("q") || "", tags: (params.get("tag") || "").split(",").filter(Boolean), type: params.get("type") || "all", ch: params.get("ch") || "all", sec: params.get("sec") || "all" };
+    const CHS = window.CHAPTERS || [];
+    document.getElementById("nav-chapters").innerHTML = CHS.map((c) => `<a href="${c.dir}/index.html">Ch. ${c.ch} · ${esc(c.title)}</a>`).join("");
     const items = [];
 
     // ---- LaTeX → searchable plain text (keeps words like "ln", "sin", "sum"; drops markup)
@@ -64,11 +68,13 @@
 
     // ---- index the decks and their pages
     const SL = window.SLIDE_DECKS || [], TXT = window.SLIDE_TEXT || {};
+    const PDFKIND = { deck: "slides", handout: "handout", review: "class quiz", problems: "problem set" };
     SL.forEach((d) => {
-      items.push({ type: "deck", sec: d.sec, title: `${d.sec} slides — ${d.title}`, href: `slides/viewer.html?d=${d.key}`, tags: d.tags, text: `${d.title} ${d.kind}` });
-      const add = (file, ans) => (TXT[file] || []).forEach((t, i) => items.push({
-        type: "slide", sec: d.sec, title: `${d.sec} ${d.title}${ans ? " (answers)" : ""} · page ${i + 1}`,
-        href: `slides/viewer.html?d=${d.key}${ans ? "&v=ans" : ""}#page=${i + 1}`, tags: [], text: t.replace(/ \/ /g, " · ") }));
+      const dir = window.CH.dir(d.ch);
+      items.push({ type: "deck", ch: d.ch, sec: d.sec, title: `${d.sec} ${PDFKIND[d.kind] || d.kind} — ${d.title}`, href: `viewer.html?d=${d.key}`, tags: d.tags, text: `${d.title} ${d.kind}` });
+      const add = (file, ans) => (TXT[`${dir}/${file}`] || []).forEach((t, i) => items.push({
+        type: "slide", ch: d.ch, sec: d.sec, title: `${d.sec} ${d.title}${ans ? " (answers)" : ""} · page ${i + 1}`,
+        href: `viewer.html?d=${d.key}${ans ? "&v=ans" : ""}#page=${i + 1}`, tags: [], text: t.replace(/ \/ /g, " · ") }));
       add(d.file, false); if (d.ans) add(d.ans, true);
     });
 
@@ -80,13 +86,13 @@
       const [kind, m] = queue.shift();
       window.HW = window.QUIZ = undefined;
       const s = document.createElement("script");
-      s.src = m.data;
+      s.src = `${m.dir}/${m.data}`;
       s.onload = () => {
         if (kind === "hw" && window.HW) window.HW.problems.forEach((p) => items.push({
-          type: "hw", sec: m.sec, title: `HW ${m.sec} · Problem ${p.n}`, sub: m.title, href: `${m.href}#p${p.n}`, tags: p.tags || [],
+          type: "hw", ch: m.ch, sec: m.sec, title: `HW ${m.sec} · Problem ${p.n}`, sub: m.title, href: `${m.dir}/${m.href}#p${p.n}`, tags: p.tags || [],
           text: plain([p.prompt, ...(p.parts || []).map((x) => `${x.q || ""} ${(x.opts || []).join(" ")}`), ...(p.opts || [])].join(" ")) }));
         if (kind === "quiz" && window.QUIZ) window.QUIZ.questions.forEach((q) => items.push({
-          type: "quiz", sec: m.sec, title: `${m.title} · Q${q.n}`, sub: q.src || "", href: `${m.href}#q${q.n}`, tags: q.tags || [],
+          type: "quiz", ch: m.ch, sec: m.sec, title: `${m.title} · Q${q.n}`, sub: q.src || "", href: `${m.dir}/${m.href}#q${q.n}`, tags: q.tags || [],
           text: plain([q.prompt, q.prompt2, ...(q.options || []).map((o) => o.text), ...(q.items || []).map((i) => i.label)].join(" ")) }));
         loadNext();
       };
@@ -98,8 +104,12 @@
     function ready() {
       items.forEach((it) => { it._hay = norm(`${it.title} ${it.sub || ""} ${it.text} ${it.tags.join(" ")}`); it._tags = new Set(it.tags); });
       TYPES.forEach(([k, label]) => { const b = document.createElement("button"); b.type = "button"; b.className = "fbtn"; b.dataset.k = k; b.innerHTML = `${label}<span class="n"></span>`; b.onclick = () => { st.type = k; update(); }; $("#types").appendChild(b); });
-      const secs = ["all", ...[...new Set(items.map((i) => i.sec))].sort((a, b) => { const f = (s) => /^\d/.test(s) ? Number(s.split(".")[1]) : 100; return f(a) - f(b); })];
-      secs.forEach((s) => { const b = document.createElement("button"); b.type = "button"; b.className = "fbtn"; b.dataset.s = s; b.textContent = s === "all" ? "All" : s; b.onclick = () => { st.sec = s; update(); }; $("#secs").appendChild(b); });
+      // chapters, then sections (numbered sections in order, then quizzes / guides / notes); a section belongs to one chapter
+      ["all", ...CHS.map((c) => String(c.ch))].forEach((c) => { const b = document.createElement("button"); b.type = "button"; b.className = "fbtn"; b.dataset.c = c; b.textContent = c === "all" ? "All" : `Ch. ${c}`; b.onclick = () => { st.ch = c; if (st.sec !== "all" && !items.some((i) => i.sec === st.sec && String(i.ch) === c)) st.sec = "all"; update(); }; $("#chs").appendChild(b); });
+      const secOf = new Map(); items.forEach((i) => { if (!secOf.has(i.sec)) secOf.set(i.sec, i.ch); });
+      const rank = (s) => /^\d+\.\d+$/.test(s) ? Number(s.split(".")[1]) : 1000;
+      const secs = ["all", ...[...secOf.keys()].sort((a, b) => (secOf.get(a) - secOf.get(b)) || rank(a) - rank(b) || a.localeCompare(b))];
+      secs.forEach((s) => { const b = document.createElement("button"); b.type = "button"; b.className = "fbtn"; b.dataset.s = s; b.dataset.c = s === "all" ? "all" : String(secOf.get(s)); b.textContent = s === "all" ? "All" : s; b.onclick = () => { st.sec = s; update(); }; $("#secs").appendChild(b); });
       $("#q").value = st.q;
       $("#form").addEventListener("submit", (e) => { e.preventDefault(); st.q = $("#q").value; update(); });
       let t; $("#q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { st.q = $("#q").value; update(); }, 160); });
@@ -107,6 +117,7 @@
     }
 
     function match(it, words) {
+      if (st.ch !== "all" && String(it.ch) !== st.ch) return false;
       if (st.sec !== "all" && it.sec !== st.sec) return false;
       if (!st.tags.every((t) => it._tags.has(t))) return false;
       return words.every((w) => w.startsWith("#") ? it._tags.has(w.slice(1)) : it._hay.includes(w));
@@ -129,24 +140,25 @@
     function update() {
       // phrase in quotes stays together; otherwise split on spaces; #tag words filter by tag
       const words = (st.q.match(/"[^"]+"|\S+/g) || []).map((w) => w.startsWith("#") ? "#" + w.slice(1).toLowerCase() : norm(w.replace(/"/g, "")));
-      const qs = new URLSearchParams(); if (st.q) qs.set("q", st.q); if (st.tags.length) qs.set("tag", st.tags.join(",")); if (st.type !== "all") qs.set("type", st.type); if (st.sec !== "all") qs.set("sec", st.sec);
+      const qs = new URLSearchParams(); if (st.q) qs.set("q", st.q); if (st.tags.length) qs.set("tag", st.tags.join(",")); if (st.type !== "all") qs.set("type", st.type); if (st.ch !== "all") qs.set("ch", st.ch); if (st.sec !== "all") qs.set("sec", st.sec);
       history.replaceState(null, "", "search.html" + (qs.toString() ? "?" + qs : ""));
       const base = items.filter((it) => match(it, words));
       const counts = { all: base.length }; base.forEach((it) => (counts[it.type] = (counts[it.type] || 0) + 1));
       document.querySelectorAll("#types .fbtn").forEach((b) => { b.classList.toggle("on", b.dataset.k === st.type); b.querySelector(".n").textContent = counts[b.dataset.k] || 0; });
-      document.querySelectorAll("#secs .fbtn").forEach((b) => b.classList.toggle("on", b.dataset.s === st.sec));
+      document.querySelectorAll("#chs .fbtn").forEach((b) => b.classList.toggle("on", b.dataset.c === st.ch));
+      document.querySelectorAll("#secs .fbtn").forEach((b) => { b.classList.toggle("on", b.dataset.s === st.sec); b.hidden = st.ch !== "all" && b.dataset.c !== "all" && b.dataset.c !== st.ch; });
       const hits = base.filter((it) => st.type === "all" || it.type === st.type);
       // tag cloud: counts among the current hits (plus any selected tags)
-      const tc = {}; (words.length || st.tags.length || st.sec !== "all" ? hits : items).forEach((it) => it.tags.forEach((t) => (tc[t] = (tc[t] || 0) + 1)));
+      const tc = {}; (words.length || st.tags.length || st.sec !== "all" || st.ch !== "all" ? hits : items).forEach((it) => it.tags.forEach((t) => (tc[t] = (tc[t] || 0) + 1)));
       st.tags.forEach((t) => (tc[t] = tc[t] || 0));
       $("#tags").innerHTML = Object.keys(tc).sort((a, b) => (st.tags.includes(b) - st.tags.includes(a)) || tc[b] - tc[a] || a.localeCompare(b))
         .map((t) => `<button type="button" class="${st.tags.includes(t) ? "on" : ""}" data-t="${esc(t)}">#${esc(t)}<span class="n">${tc[t]}</span></button>`).join("");
       $("#tags").querySelectorAll("button").forEach((b) => b.onclick = () => { const t = b.dataset.t; st.tags = st.tags.includes(t) ? st.tags.filter((x) => x !== t) : [...st.tags, t]; update(); });
-      if (!words.length && !st.tags.length && st.sec === "all") { $("#status").textContent = `${items.length} items indexed (${counts.hw || 0} homework problems, ${counts.quiz || 0} quiz questions, ${counts.deck || 0} PDFs, ${counts.slide || 0} slide pages). Type keywords or pick a tag.`; $("#results").innerHTML = ""; return; }
+      if (!words.length && !st.tags.length && st.sec === "all" && st.ch === "all") { $("#status").textContent = `${items.length} items indexed (${counts.hw || 0} homework problems, ${counts.quiz || 0} quiz questions, ${counts.deck || 0} PDFs, ${counts.slide || 0} slide pages). Type keywords or pick a tag.`; $("#results").innerHTML = ""; return; }
       hits.sort((a, b) => score(b, words) - score(a, words));
       $("#status").textContent = `${hits.length} result${hits.length === 1 ? "" : "s"}${st.tags.length ? ` · tags: ${st.tags.map((t) => "#" + t).join(" ")}` : ""}${hits.length > 200 ? " · showing the first 200" : ""}`;
-      const kind = { hw: "Homework", quiz: "Quiz question", deck: "Slide deck", slide: "Slide page" };
-      $("#results").innerHTML = hits.slice(0, 200).map((it) => `<article class="hit t-${it.type}"><span class="kind">${kind[it.type]}${it.sub ? ` · ${esc(it.sub)}` : ""}</span>
+      const kind = { hw: "Homework", quiz: "Quiz question", deck: "PDF", slide: "Slide page" };
+      $("#results").innerHTML = hits.slice(0, 200).map((it) => `<article class="hit t-${it.type}"><span class="kind">Ch. ${it.ch} · ${kind[it.type]}${it.sub ? ` · ${esc(it.sub)}` : ""}</span>
         <a class="ttl" href="${it.href}">${esc(it.title)}</a><div class="snip">${snippet(it, words.filter((w) => !w.startsWith("#")))}</div>
         ${it.tags.length ? `<div class="tags">${it.tags.map((t) => `<a class="tag" href="search.html?tag=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("")}</div>` : ""}</article>`).join("");
     }

@@ -7,7 +7,7 @@
  * kept in localStorage per set, with a filter to show only the problems marked Review.
  * Deep link: page.html#p12 jumps to problem 12.
  *
- * Data (hw/<set>/data.js):
+ * Data (ch<N>/hw/<set>/data.js):
  *   window.HW = { id, sec, title, deck, quiz, intro, problems: [
  *     { n, tags: [..], src: ["p1_.png"], fig: [{ img, alt }], prompt: "html + $tex$",
  *       parts: [{ l: "a", q: "ask", a: "answer", w: "work" }],   // or a / w directly on the problem
@@ -25,7 +25,8 @@
   const MODES = [["blind", "Blind"], ["answers", "Answers"], ["work", "Work"]];
   const modeOf = (p) => st.per[p.n] || st.mode;
   const partsOf = (p) => p.parts || [{ l: "", q: "", a: p.a, w: p.w || "", opts: p.opts, key: p.key, multi: p.multi }];
-  const root = HW.root || "../../";
+  const root = HW.root || "../../../";          // site root (assets, viewer, search) from ch<N>/hw/<set>/
+  const chRoot = HW.chRoot || "../../";         // chapter folder: HW.quiz / HW.deck paths are chapter-relative
 
   function typeset(node) {
     if (!window.renderMathInElement) return;
@@ -40,8 +41,8 @@
   // ---------------- top bar ----------------
   document.title = `${HW.sec} ${HW.title} · Homework · MAT 231`;
   $("#hw-title").textContent = `HW ${HW.sec} · ${HW.title}`;
-  if (HW.deck) { const a = $("#deck-link"); a.href = `${root}slides/viewer.html?d=${HW.deck}`; a.hidden = false; a.textContent = `${HW.sec} slides ↗`; }
-  if (HW.quiz) { const a = $("#quiz-link"); a.href = root + HW.quiz; a.hidden = false; }
+  if (HW.deck) { const a = $("#deck-link"); a.href = `${root}viewer.html?d=${HW.deck}`; a.hidden = false; a.textContent = `${HW.sec} slides ↗`; }
+  if (HW.quiz) { const a = $("#quiz-link"); a.href = chRoot + HW.quiz; a.hidden = false; }
   const seg = $("#mode");
   MODES.forEach(([k, label]) => {
     const b = document.createElement("button");
@@ -167,4 +168,10 @@
     if (st.filter === "review") { st.filter = "all"; save(); applyFilter(); }
     requestAnimationFrame(() => { cards[m[1]].scrollIntoView({ block: "start" }); cards[m[1]].classList.add("flash"); });
   }
+})();
+
+// Chapter label on the home button: pages live in ch<N>/..., and "Home" leads back to that chapter's hub.
+(function () {
+  const m = location.pathname.match(/\/ch(\d+)\//), hb = document.querySelector(".home-btn");
+  if (m && hb && hb.lastChild && hb.lastChild.nodeType === 3) hb.lastChild.textContent = " Ch. " + m[1];
 })();

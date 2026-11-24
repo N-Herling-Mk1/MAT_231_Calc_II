@@ -2,7 +2,8 @@
    White field with a faint cyan grid, Orbitron display type, Share Tech Mono readouts.
    One accent per column: cyan = slide quizzes, violet = slide decks, green = homework, amber = handouts & review.
    Accent text uses the darker "-ink" shade so small text keeps >= 4.5:1 contrast on white.
-   Used by index.html (hub), search.html and the homework pages. Quiz pages use quiz.css. */
+   Used by index.html (course home: chapter cards), ch<N>/index.html (chapter hubs), search.html and the homework pages.
+   Quiz pages and the slide viewer use quiz.css. */
 @font-face { font-family: "Orbitron"; font-weight: 500; font-display: swap; src: url("../vendor/fonts/orbitron-latin-500-normal.woff2") format("woff2"); }
 @font-face { font-family: "Orbitron"; font-weight: 700; font-display: swap; src: url("../vendor/fonts/orbitron-latin-700-normal.woff2") format("woff2"); }
 @font-face { font-family: "Orbitron"; font-weight: 900; font-display: swap; src: url("../vendor/fonts/orbitron-latin-900-normal.woff2") format("woff2"); }
@@ -79,6 +80,9 @@ button, input, select { font: inherit; }
 .chapter-tabs span { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; padding: 6px 12px;
   border: 1px solid var(--line); color: var(--muted); }
 .chapter-tabs span.on { border-color: var(--cyan); color: #fff; background: var(--cyan-ink); }
+.chapter-tabs a { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; padding: 6px 12px;
+  border: 1px solid var(--cyan); color: var(--cyan-ink); background: #fff; text-decoration: none; }
+.chapter-tabs a:hover, .chapter-tabs a:focus-visible { background: var(--cyan); color: #fff; outline: none; }
 
 /* ---------- columns ---------- */
 .columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; align-items: start; padding-bottom: 60px; }
@@ -112,6 +116,8 @@ button, input, select { font: inherit; }
 .card .prog i { display: block; height: 100%; background: var(--acc); box-shadow: 0 0 6px var(--acc); }
 .card .prog-text { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
 .card.soon { opacity: .6; }
+.card .dl.ps { border-color: #c9b2f5; color: var(--violet-ink); background: #f5effe; }
+.card.ps { border-left-color: var(--violet); }
 @media (max-width: 1250px) { .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 700px) {
   .columns { grid-template-columns: 1fr; } .hero-grid { grid-template-columns: 1fr; } .sigil { display: none; }
@@ -241,3 +247,45 @@ table.tbl th { background: #f1f7f9; }
 .part.compact .lbl { min-width: 64px; font-family: var(--body); font-weight: 600; font-size: 14px; color: var(--green-ink); letter-spacing: 0; }
 
 [hidden] { display: none !important; }
+
+/* ---------- course home: chapter cards ---------- */
+.ch-head { --acc: var(--cyan); --acc-ink: var(--cyan-ink); }
+.chapters { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 560px), 1fr)); gap: 22px; padding-bottom: 60px; }
+.chcard { position: relative; background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--cyan); padding: 18px 22px 18px;
+  transition: box-shadow .15s, transform .15s; }
+.chcard:hover, .chcard:focus-within { box-shadow: 0 0 0 1px var(--cyan), 0 8px 28px rgba(0, 120, 150, .14); transform: translateY(-1px); }
+.chcard .ch-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.chcard .ch-num { font-family: var(--display); font-weight: 900; font-size: 30px; letter-spacing: .08em; color: var(--cyan-ink); line-height: 1; }
+.chcard .ch-exam { font-family: var(--mono); font-size: 12.5px; color: var(--amber-ink); background: var(--amber-wash); border: 1px solid #e8c45c; padding: 1px 8px; }
+.chcard .ch-title { margin: 6px 0 4px; font-family: var(--display); font-weight: 700; font-size: 21px; letter-spacing: .04em; }
+.chcard .ch-go { color: var(--ink); text-decoration: none; }
+.chcard .ch-go::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.chcard .ch-blurb { margin: 0 0 10px; color: var(--ink-2); }
+.chcard .ch-secs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+.chcard .ch-secs span { font-family: var(--mono); font-size: 12px; color: var(--violet-ink); border: 1px solid #d9c8fb; padding: 0 6px; }
+.chcard .ch-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.chcard .st { position: relative; z-index: 2; display: flex; flex-direction: column; text-decoration: none; color: var(--ink); border-top: 3px solid var(--acc); background: #f7fbfc; padding: 8px 10px; }
+.chcard .st:hover, .chcard .st:focus-visible { background: #fff; box-shadow: 0 0 0 1px var(--acc); outline: none; }
+.chcard .st b { font-family: var(--display); font-weight: 900; font-size: 24px; color: var(--acc-ink); line-height: 1.1; }
+.chcard .st span { font-size: 13px; font-weight: 600; }
+.chcard .st i { font-style: normal; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.chcard .s-quiz { --acc: var(--cyan); --acc-ink: var(--cyan-ink); }
+.chcard .s-slides { --acc: var(--violet); --acc-ink: var(--violet-ink); }
+.chcard .s-hw { --acc: var(--green); --acc-ink: var(--green-ink); }
+.chcard .s-review { --acc: var(--amber); --acc-ink: var(--amber-ink); }
+.chcard .ch-prog { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; margin-bottom: 12px; }
+.chcard .ch-prog .lbl { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
+.chcard .ch-prog .num { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-align: right; white-space: nowrap; }
+.chcard .ch-prog .bar { display: block; height: 5px; background: var(--line-2); }
+.chcard .ch-prog .bar i { display: block; height: 100%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+.chcard .ch-prog .bar.hw i { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.chcard .ch-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+.chcard .ch-tags a { position: relative; z-index: 2; font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); background: #f3f8fa; border: 1px solid var(--line-2); padding: 0 6px; text-decoration: none; }
+.chcard .ch-tags a:hover { color: #fff; background: var(--cyan-ink); border-color: var(--cyan-ink); }
+.chcard .ch-actions .go { font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--cyan-ink); text-decoration: none; }
+@media (max-width: 700px) {
+  .chcard { padding: 16px 16px; }
+  .chcard .ch-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chcard .ch-prog { grid-template-columns: minmax(0, 1fr) auto; grid-auto-flow: row dense; }
+  .chcard .ch-prog .bar { grid-column: 1 / -1; }
+}

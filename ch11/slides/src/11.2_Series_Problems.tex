@@ -1,0 +1,222 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{needspace}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cyanT}{HTML}{0097B2}
+\definecolor{violetT}{HTML}{6A3FD1}
+\definecolor{greyT}{HTML}{5A6570}
+
+\titleformat{\section}{\Large\bfseries\color{cyanT}}{}{0pt}{}[\vspace{-0.6ex}{\color{cyanT}\rule{\textwidth}{0.6pt}}]
+\titlespacing*{\section}{0pt}{1.2ex}{1.6ex}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\color{greyT}MAT 231 \,·\, Calculus II}
+\rhead{\small\color{greyT}11.2 Series \,·\, Problem Set}
+\cfoot{\small\color{greyT}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.4ex}
+
+% problem / solution headers
+\newcounter{prob}
+\newcommand{\prob}[2]{\par\needspace{6\baselineskip}\refstepcounter{prob}\medskip
+  {\bfseries\color{violetT}Problem \theprob.}\ {\small\color{greyT}[#1]}\label{#2}\par\nopagebreak}
+\newcommand{\sol}[2]{\par\needspace{14\baselineskip}\bigskip
+  {\bfseries\color{violetT}Solution \ref{#1}.}\ {\small\color{greyT}[#2]}\par\nopagebreak\smallskip}
+\newcommand{\ans}[1]{\par\smallskip\fbox{\parbox{0.95\linewidth}{\textbf{Answer:} #1}}\par}
+\newcommand{\src}[1]{\hfill{\small\color{greyT}slide p.~#1}}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{cyanT} 11.2 Series}\\[0.6ex]
+  {\large Problem Set \,—\, problems only (Part I), worked solutions (Part II)}\\[0.6ex]
+  {\small\color{greyT}Every problem from the 11.2 lecture slides, with repeats removed.
+  The page number in brackets is the slide page where each problem appears.}
+\end{center}
+
+\section*{Part I \,—\, Problems}
+
+\prob{warm-up from 11.1 \,·\, slide p.~1}{p:warm}
+Find the first four terms of the sequence $a_n = n^2e^{-5n}$. Does the sequence converge or diverge? If it converges, find the limit.
+
+\prob{partial sums \,·\, slide pp.~2--3}{p:half}
+Let $a_n = \dfrac{1}{2^n}$.
+\begin{enumerate}[label=(\alph*),itemsep=0.2ex,topsep=0.3ex]
+  \item Find the first four terms $a_1,\dots,a_4$ and the first four partial sums $s_1,\dots,s_4$.
+  \item Show that $s_n = \dfrac{2^n-1}{2^n}$ in general. Why does this formula hold?
+  \item Use (b) to evaluate $\displaystyle\sum_{n=1}^{\infty}\frac{1}{2^n}$.
+\end{enumerate}
+
+\prob{test for divergence \,·\, slide p.~5}{p:two}
+Show that $\displaystyle\sum_{n=1}^{\infty} 2^n$ diverges.
+
+\prob{partial sums \,·\, slide p.~6}{p:p2}
+Find the first six partial sums of $\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^2}$. Does the series appear to be convergent or divergent?
+
+\prob{geometric series \,·\, slide p.~8}{p:four}
+Is $\displaystyle\sum_{n=1}^{\infty} 4\left(\frac13\right)^{n-1}$ a geometric series? Does it converge? If so, what does it converge to?
+
+\prob{geometric series \,·\, slide p.~10}{p:hundred}
+Is $\displaystyle\sum_{n=1}^{\infty}\frac{2^n}{100}$ geometric? Does it converge or diverge?
+
+\prob{geometric series \,·\, slide p.~11 (repeated p.~12)}{p:neg}
+Is $\displaystyle\sum_{n=1}^{\infty}\left(-\frac29\right)^n$ geometric? Does it converge or diverge? If it converges, find its sum.
+
+\prob{harmonic series \,·\, slide p.~11 (repeated p.~13)}{p:six}
+Does $\displaystyle\sum_{n=1}^{\infty}\frac{6}{n}$ converge or diverge?
+
+\prob{geometric series \,·\, slide p.~11 (repeated p.~14)}{p:twothird}
+Does $\displaystyle\sum_{n=1}^{\infty}\frac{2^n}{3^{n+1}}$ converge or diverge? If it converges, find its sum.
+
+\prob{telescoping \,·\, slide p.~15}{p:tele}
+Show that $\displaystyle\sum_{n=1}^{\infty}\frac{1}{n(n+1)}$ is convergent and find its sum.
+
+\prob{geometric series in disguise \,·\, slide pp.~16--20}{p:x}
+Find the values of $x$ for which each series converges. For those values, find the sum.
+\begin{enumerate}[label=(\alph*),itemsep=0.4ex,topsep=0.3ex]
+  \item $\displaystyle\sum_{n=1}^{\infty}(-4)^n(x-5)^n$
+  \item $\displaystyle\sum_{n=1}^{\infty}(x+2)^n$
+  \item $\displaystyle\sum_{n=1}^{\infty}\frac{2^n}{x^n}$
+\end{enumerate}
+{\small\color{greyT}(The slides' parts (d) and (e) repeat (b) and (c) exactly, so they are not listed again.)}
+
+\vfill
+{\small\color{greyT}Reference facts used in Part II, all from the 11.2 slides: the series converges iff $\lim s_n$ exists;
+test for divergence; geometric series $\sum ar^{n-1}$ converges to $\frac{a}{1-r}$ iff $|r|<1$;
+the harmonic series $\sum\frac1n$ diverges.}
+
+% ==================================================================
+\newpage
+\section*{Part II \,—\, Solutions}
+
+\sol{p:warm}{11.1}
+$a_1 = e^{-5},\quad a_2 = 4e^{-10},\quad a_3 = 9e^{-15},\quad a_4 = 16e^{-20}.$\\[0.5ex]
+Write $a_n = \dfrac{n^2}{e^{5n}}$, an $\frac{\infty}{\infty}$ form. Apply L'Hôpital's rule twice to $f(x)=\frac{x^2}{e^{5x}}$:
+\[
+\lim_{x\to\infty}\frac{x^2}{e^{5x}} = \lim_{x\to\infty}\frac{2x}{5e^{5x}} = \lim_{x\to\infty}\frac{2}{25e^{5x}} = 0 .
+\]
+\ans{The sequence converges, and $\displaystyle\lim_{n\to\infty} n^2e^{-5n} = 0$.}
+
+\sol{p:half}{partial sums}
+(a)\\[-1ex]
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{cll}
+\toprule
+$n$ & $a_n$ & $s_n$ \\ \midrule
+1 & $\tfrac12$  & $s_1 = \tfrac12$ \\
+2 & $\tfrac14$  & $s_2 = \tfrac12+\tfrac14 = \tfrac34$ \\
+3 & $\tfrac18$  & $s_3 = \tfrac12+\tfrac14+\tfrac18 = \tfrac78$ \\
+4 & $\tfrac1{16}$ & $s_4 = \tfrac12+\tfrac14+\tfrac18+\tfrac1{16} = \tfrac{15}{16}$ \\ \bottomrule
+\end{tabular}
+\end{center}
+(b) Each partial sum falls short of $1$ by exactly the last term added: $1-s_n = \frac1{2^n}$, because adding $\frac1{2^{n+1}}$ covers half of the remaining gap $\frac1{2^n}$.
+So $s_n = 1-\frac1{2^n} = \frac{2^n-1}{2^n}$.
+Equivalently, the series is geometric with $a=\frac12$, $r=\frac12$, so
+$s_n = \dfrac{a(1-r^n)}{1-r} = \dfrac{\frac12\left(1-\frac1{2^n}\right)}{\frac12} = 1-\dfrac1{2^n}$.\\[0.5ex]
+(c) $\displaystyle\sum_{n=1}^{\infty}\frac1{2^n} = \lim_{n\to\infty}s_n = \lim_{n\to\infty}\left(1-\frac1{2^n}\right) = 1-0 = 1.$
+\ans{$s_1,\dots,s_4 = \tfrac12,\tfrac34,\tfrac78,\tfrac{15}{16}$; \ $s_n = \frac{2^n-1}{2^n}$; \ the sum is $1$.}
+
+\sol{p:two}{test for divergence}
+$\displaystyle\lim_{n\to\infty}2^n = \infty \neq 0$, so the series diverges by the Test for Divergence.
+(It is also geometric with $r=2$, $|r|\ge 1$.)
+\ans{Diverges.}
+
+\sol{p:p2}{partial sums}
+\begin{center}
+\renewcommand{\arraystretch}{1.45}
+\begin{tabular}{cll}
+\toprule
+$n$ & $s_n$ (exact) & $s_n$ (decimal) \\ \midrule
+1 & $1$ & $1.0000$ \\
+2 & $1+\tfrac14 = \tfrac54$ & $1.2500$ \\
+3 & $\tfrac54+\tfrac19 = \tfrac{49}{36}$ & $1.3611$ \\
+4 & $\tfrac{49}{36}+\tfrac1{16} = \tfrac{205}{144}$ & $1.4236$ \\
+5 & $\tfrac{205}{144}+\tfrac1{25} = \tfrac{5269}{3600}$ & $1.4636$ \\
+6 & $\tfrac{5269}{3600}+\tfrac1{36} = \tfrac{5369}{3600}$ & $1.4914$ \\ \bottomrule
+\end{tabular}
+\end{center}
+The partial sums increase, and each increase $\frac1{n^2}$ is smaller than the last, so the series \emph{appears} to converge.
+Six partial sums cannot prove this. It is proved in 11.3 (it is a $p$-series with $p=2>1$), and the sum is $\frac{\pi^2}{6}\approx 1.6449$.
+\ans{Appears convergent.}
+
+\sol{p:four}{geometric series}
+Yes, it is geometric with first term $a=4$ (at $n=1$) and ratio $r=\frac13$. Since $|r|<1$, it converges:
+\[
+\sum_{n=1}^{\infty}4\left(\frac13\right)^{n-1} = \frac{a}{1-r} = \frac{4}{1-\frac13} = \frac{4}{\frac23} = 6 .
+\]
+\ans{Geometric; converges to $6$.}
+
+\sol{p:hundred}{geometric series}
+$\dfrac{2^n}{100} = \dfrac{1}{50}\cdot 2^{n-1}$, so it is geometric with $a=\frac2{100}=\frac1{50}$ and $r=2$.
+Since $|r| = 2 \ge 1$, it diverges. (The Test for Divergence also applies: $\frac{2^n}{100}\to\infty$.)
+\ans{Geometric; diverges.}
+
+\sol{p:neg}{geometric series}
+Yes, it is geometric with $r=-\frac29$. The first term ($n=1$) is $a=-\frac29$. Since $|r| = \frac29<1$, it converges:
+\[
+\sum_{n=1}^{\infty}\left(-\frac29\right)^n = \frac{a}{1-r} = \frac{-\frac29}{1+\frac29} = \frac{-\frac29}{\frac{11}{9}} = -\frac{2}{11}.
+\]
+\ans{Geometric; converges to $-\frac{2}{11}$.}
+
+\sol{p:six}{harmonic series}
+\begin{minipage}{\linewidth}
+This is not geometric. $\displaystyle\sum_{n=1}^{\infty}\frac6n = 6\sum_{n=1}^{\infty}\frac1n$, which is $6$ times the harmonic series.
+The harmonic series diverges, and a nonzero constant multiple of a divergent series diverges.
+(If $\sum\frac6n$ converged, then $\sum\frac1n = \frac16\sum\frac6n$ would converge as well, which is false.)
+The Test for Divergence gives no information here, because $\frac6n\to 0$.
+\ans{Diverges.}
+\end{minipage}
+
+\sol{p:twothird}{geometric series}
+Rewrite: $\dfrac{2^n}{3^{n+1}} = \dfrac13\left(\dfrac23\right)^n$, so it is geometric with $r=\frac23$.
+The first term ($n=1$) is $a = \frac{2}{9}$. Since $|r|<1$, it converges:
+\[
+\sum_{n=1}^{\infty}\frac{2^n}{3^{n+1}} = \frac{a}{1-r} = \frac{\frac29}{1-\frac23} = \frac{\frac29}{\frac13} = \frac23 .
+\]
+\ans{Converges to $\frac23$.}
+
+\sol{p:tele}{telescoping}
+Partial fractions: $\dfrac{1}{n(n+1)} = \dfrac1n - \dfrac1{n+1}$. Then
+\[
+s_n = \left(1-\tfrac12\right)+\left(\tfrac12-\tfrac13\right)+\left(\tfrac13-\tfrac14\right)+\cdots+\left(\tfrac1n-\tfrac1{n+1}\right) = 1-\frac1{n+1},
+\]
+because every inner term cancels. So
+$\displaystyle\sum_{n=1}^{\infty}\frac1{n(n+1)} = \lim_{n\to\infty}\left(1-\frac1{n+1}\right) = 1.$
+\ans{Converges to $1$.}
+
+\sol{p:x}{geometric series in disguise}
+Each series is geometric in $n$. A geometric series converges exactly when $|r|<1$. At $|r|=1$ the terms do not go to $0$, so both endpoints diverge.
+For $\sum_{n=1}^\infty r^n$ the first term is $r$, so the sum is $\dfrac{r}{1-r}$.\\[0.8ex]
+(a) $(-4)^n(x-5)^n = \big[-4(x-5)\big]^n$, so $r = -4(x-5) = 20-4x$.
+\[
+|4(x-5)|<1 \iff |x-5|<\tfrac14 \iff \tfrac{19}{4}<x<\tfrac{21}{4}.
+\qquad \text{Sum} = \frac{20-4x}{1-(20-4x)} = \frac{20-4x}{4x-19}.
+\]
+(b) $r = x+2$.
+\[
+|x+2|<1 \iff -3<x<-1.
+\qquad \text{Sum} = \frac{x+2}{1-(x+2)} = -\frac{x+2}{x+1}.
+\]
+(c) $\dfrac{2^n}{x^n} = \left(\dfrac2x\right)^n$, so $r=\frac2x$ (with $x\neq0$).
+\[
+\left|\tfrac2x\right|<1 \iff |x|>2 \iff x<-2 \ \text{or}\ x>2.
+\qquad \text{Sum} = \frac{\frac2x}{1-\frac2x} = \frac{2}{x-2}.
+\]
+\ans{(a) $\tfrac{19}{4}<x<\tfrac{21}{4}$, sum $\frac{20-4x}{4x-19}$; \quad
+(b) $-3<x<-1$, sum $-\frac{x+2}{x+1}$; \quad
+(c) $|x|>2$, sum $\frac{2}{x-2}$.}
+
+\end{document}
