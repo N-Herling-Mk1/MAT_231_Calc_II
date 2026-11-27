@@ -22,6 +22,9 @@ window.CHAPTERS = [
     blurb: "Sequences, infinite series and the convergence tests, then power series, Taylor and Maclaurin series." },
 ];
 
+/* The chapter the course is on right now: shown on the CRT screen on the course home (overview). Change it as the term moves on. */
+window.CURRENT_CH = 11;
+
 window.CH = {
   get: (n) => window.CHAPTERS.find((c) => c.ch === Number(n)),
   dir: (n) => { const c = window.CHAPTERS.find((x) => x.ch === Number(n)); return c ? c.dir : "ch" + n; },

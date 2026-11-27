@@ -131,23 +131,44 @@
         <a class="more" href="outline.html#ch-${n}">Full textbook outline →</a></div>`;
     }
 
+    // ---- CRT tube: chapter number + title, typed out on the phosphor screen
+    function crt(n, label) {
+      const d = D[n], c = d.c;
+      return `<div class="crt" aria-label="${esc(label)}: Chapter ${n}, ${esc(c.title)}"><div class="crt-bezel"><div class="crt-screen">
+        <div class="crt-k">&gt; ${esc(label.toUpperCase())}</div>
+        <div class="crt-big">CH ${n}</div>
+        <div class="crt-title" data-type="${esc(c.title)}">${esc(c.title)}</div>
+        <div class="crt-meta">§ ${esc(c.sections)}${c.exam ? ` · ${esc(c.exam)}` : ""} · ${d.loaded ? `${d.done}% done` : "pending"}<span class="crt-cur">█</span></div>
+      </div></div><div class="crt-led" aria-hidden="true"></div></div>`;
+    }
+    function typeCrt() {
+      const t = document.querySelector(".crt-title[data-type]");
+      if (!t || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const full = t.dataset.type; let i = 0; t.textContent = "";
+      const tick = () => { t.textContent = full.slice(0, ++i); if (i < full.length) setTimeout(tick, 28); };
+      setTimeout(tick, 180);
+    }
+
     // ---- main area
     function mainOverview() {
-      return `<div class="fade"><section class="hero"><div class="k">Pima CC · Fall 2026 · Study hub</div>
+      const now = D[window.CURRENT_CH] ? window.CURRENT_CH : (CHS.filter((c) => D[c.ch].loaded).pop() || CHS[0] || {}).ch;
+      return `<div class="fade"><section class="hero hero-grid"><div><div class="k">Pima CC · Fall 2026 · Study hub</div>
         <h1>MAT 231 <b>//</b> Calculus II</h1>
         <p>Organized by chapter. Each chapter has the lecture slides as handed out, a quiz generated from every deck, problem sets with worked solutions, and the WebAssign homework transcribed with blind, answers and worked-solution views. Everything is searchable by keyword or tag.</p>
-        <div class="readout">SYS // ${CHS.length} chapters · ${T.ld} loaded · ${T.q} quiz questions · ${T.qd} answered here · ${T.p} homework problems · ${T.pd} marked got-it · ${T.pdf} PDFs</div></section>
+        <div class="readout">SYS // ${CHS.length} chapters · ${T.ld} loaded · ${T.q} quiz questions · ${T.qd} answered here · ${T.p} homework problems · ${T.pd} marked got-it · ${T.pdf} PDFs</div></div>
+        ${now ? crt(now, "Current chapter") : ""}</section>
         <div class="grid">${CHS.map((c) => { const d = D[c.ch]; return `<div class="cc${d.loaded ? "" : " pending"}" role="button" tabindex="0" data-go="${c.ch}" title="Show Ch. ${c.ch}">
-          <div class="top"><span class="num">CH ${c.ch}</span>${c.exam ? `<span class="badge exam">${esc(c.exam)}</span>` : d.loaded ? "" : `<span class="badge">not loaded yet</span>`}</div>
+          <div class="top"><span class="num">CH ${c.ch}</span>${c.exam ? `<span class="badge exam">${esc(c.exam)}</span>` : d.loaded ? "" : `<span class="badge">pending</span>`}${String(c.ch) === String(window.CURRENT_CH) ? `<span class="badge now">now</span>` : ""}</div>
           <h3>${esc(c.title)}</h3><p>${esc(c.blurb)}</p>
-          <span class="m">§ ${esc(c.sections)}${d.loaded ? ` · ${d.nq} quiz Qs · ${d.np} HW problems · ${d.sl.length} PDFs` : ` · ${d.secs.length} sections`}</span>
+          <span class="m">§ ${esc(c.sections)}${d.loaded ? ` · ${d.nq} Qs · ${d.np} HW` : ` · ${d.secs.length} sections`}</span>
           ${d.loaded ? `<span class="pb"><i style="width:${d.done}%"></i></span>` : ""}
         </div>`; }).join("")}</div></div>`;
     }
     function mainChapter(n) {
       const d = D[n], c = d.c, go = `${c.dir}/index.html`;
-      const head = `<section class="chhead"><div class="num">CHAPTER ${n}</div><h1>${esc(c.title)}</h1><p>${esc(c.blurb)}</p>
-        <div class="meta">§ ${esc(c.sections)}${c.exam ? ` · <span class="exam">${esc(c.exam)}</span>` : ""}${d.loaded ? ` · ${d.done}% worked through in this browser` : " · not loaded yet"}</div></section>
+      const head = `<section class="chhead hero-grid"><div><div class="num">CHAPTER ${n}</div><h1>${esc(c.title)}</h1><p>${esc(c.blurb)}</p>
+        <div class="meta">§ ${esc(c.sections)}${c.exam ? ` · <span class="exam">${esc(c.exam)}</span>` : ""}${d.loaded ? ` · ${d.done}% worked through in this browser` : " · not loaded yet"}</div></div>
+        ${crt(n, String(n) === String(window.CURRENT_CH) ? "Current chapter" : "Selected chapter")}</section>
         <div class="acts"><a class="btn" href="${go}">Open chapter hub →</a><a class="btn ghost" href="outline.html#ch-${n}">Textbook outline</a>${d.loaded ? `<a class="btn ghost" href="search.html?ch=${n}">Search Ch. ${n}</a>` : ""}</div>`;
       if (!d.loaded) return `<div class="fade">${head}<div class="pendbox"><b>Nothing loaded for Chapter ${n} yet.</b> Slides, homework and quizzes appear here as the course covers it. The textbook outline for the chapter is on the left; the hub page is ready at <code>${esc(go)}</code>.</div></div>`;
       const row = (href, sec, title, extra) => `<a class="row" href="${href}"><span class="s">${esc(sec)}</span><span>${esc(title)}<span class="x">${extra}</span></span></a>`;
@@ -181,6 +202,7 @@
       $("rail").innerHTML = v === "all" ? railSummary() : railOutline(Number(v));
       $("rail").scrollTop = 0;
       $("main").innerHTML = v === "all" ? mainOverview() : mainChapter(Number(v));
+      typeCrt();
       document.title = v === "all" ? "MAT 231 · Calculus II · Study Hub" : `Ch. ${v} · ${D[v].c.title} · MAT 231`;
       if (push) history.replaceState(null, "", v === "all" ? location.pathname : "#ch-" + v);
       requestAnimationFrame(moveHl);
