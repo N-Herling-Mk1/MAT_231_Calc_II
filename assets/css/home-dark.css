@@ -141,21 +141,54 @@ a { color: var(--cyan); }
 .hero h1 b { color: var(--cyan); text-shadow: 0 0 16px var(--cyan-glow); }
 .hero p { margin: 0; color: var(--ink-2); max-width: 860px; }
 .readout { font-family: var(--mono); font-size: 13px; color: var(--muted); margin: 12px 0 26px; letter-spacing: .04em; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; }
-.cc { position: relative; border: 1px solid var(--line); background: linear-gradient(180deg, var(--panel), var(--bg-2)); padding: 16px 18px 14px; cursor: pointer;
-  transition: border-color .15s, box-shadow .15s, transform .15s; }
-.cc:hover, .cc:focus-visible { border-color: var(--cyan); box-shadow: 0 0 0 1px rgba(34, 211, 238, .2), 0 10px 30px rgba(0, 0, 0, .5), 0 0 22px rgba(34, 211, 238, .12); transform: translateY(-1px); outline: none; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 16px; max-width: 1240px; }
+.cc { position: relative; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(180deg, var(--panel), var(--bg-2));
+  padding: 12px 14px 11px; cursor: pointer; transition: border-color .2s, box-shadow .25s, transform .2s; }
+/* neon haze on hover: outer shadows only, so the glow sits around the edges and never inside the tile */
+.cc:hover, .cc:focus-visible { border-color: var(--cyan); transform: translateY(-2px); outline: none;
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, .35), 0 0 12px 1px rgba(34, 211, 238, .55), 0 0 30px 4px rgba(34, 211, 238, .22), 0 0 46px 8px rgba(167, 139, 250, .16); }
 .cc.pending { border-style: dashed; }
-.cc .top { display: flex; align-items: baseline; gap: 10px; }
-.cc .num { font-family: var(--display); font-weight: 900; font-size: 26px; letter-spacing: .08em; color: var(--cyan); line-height: 1; }
+.cc.pending:hover, .cc.pending:focus-visible { border-color: #6a8794;
+  box-shadow: 0 0 0 1px rgba(106, 135, 148, .3), 0 0 12px 1px rgba(106, 135, 148, .45), 0 0 28px 4px rgba(106, 135, 148, .18); }
+.cc .top { display: flex; align-items: center; gap: 6px; }
+.cc .num { font-family: var(--display); font-weight: 900; font-size: 18px; letter-spacing: .08em; color: var(--cyan); line-height: 1; margin-right: auto; }
 .cc.pending .num { color: var(--muted); }
-.cc .badge { margin-left: auto; font-family: var(--mono); font-size: 11.5px; padding: 1px 8px; border: 1px solid var(--line); color: var(--muted); }
+.cc .badge { font-family: var(--mono); font-size: 10.5px; padding: 0 6px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); }
 .cc .badge.exam { color: var(--amber); border-color: #6b5214; }
-.cc h3 { font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: .04em; margin: 8px 0 4px; }
-.cc p { margin: 0 0 10px; font-size: 13.5px; color: var(--ink-2); }
-.cc .m { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-.cc .pb { display: block; height: 3px; background: var(--line-2); margin-top: 10px; }
+.cc .badge.now { color: #00151a; background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow); }
+.cc h3 { font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .04em; margin: 8px 0 4px; line-height: 1.3; }
+.cc p { margin: 0 0 8px; font-size: 12.5px; line-height: 1.4; color: var(--ink-2);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cc .m { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.cc .pb { display: block; height: 2px; background: var(--line-2); margin-top: 8px; border-radius: 2px; overflow: hidden; }
 .cc .pb i { display: block; height: 100%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+
+/* ---------------- hero + CRT tube ---------------- */
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
+.crt { position: relative; justify-self: end; width: 340px; }
+.crt-bezel { padding: 12px; border-radius: 22px; background: linear-gradient(160deg, #1b2a33, #0a1218 55%, #121d24);
+  border: 1px solid #22394a; box-shadow: 0 14px 34px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .06), inset 0 -2px 6px rgba(0, 0, 0, .6); }
+.crt-screen { position: relative; overflow: hidden; border-radius: 16px / 22px; min-height: 150px; padding: 16px 18px 14px;
+  background: radial-gradient(130% 120% at 50% 45%, #06303a 0%, #031a20 55%, #010a0d 100%);
+  color: #7df3ff; font-family: var(--mono); text-shadow: 0 0 6px rgba(34, 211, 238, .85), 0 0 14px rgba(34, 211, 238, .35);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, .85), inset 0 0 70px rgba(34, 211, 238, .08); animation: crt-flicker 6s infinite; }
+/* scanlines + curved-glass vignette + a slow refresh bar */
+.crt-screen::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .28) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
+.crt-screen::after { content: ""; position: absolute; left: 0; right: 0; height: 40px; top: -40px; pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(125, 243, 255, .07), transparent); animation: crt-roll 5.5s linear infinite; }
+.crt-k { font-size: 11px; letter-spacing: .2em; opacity: .75; }
+.crt-big { font-family: var(--display); font-weight: 900; font-size: 40px; letter-spacing: .1em; line-height: 1.05; margin: 4px 0 2px; }
+.crt-title { font-family: var(--display); font-weight: 700; font-size: 14.5px; letter-spacing: .05em; min-height: 2.6em; line-height: 1.3; }
+.crt-meta { font-size: 11.5px; opacity: .8; margin-top: 6px; }
+.crt-cur { margin-left: 6px; animation: crt-blink 1s steps(1) infinite; }
+.crt-led { position: absolute; right: 22px; bottom: 4px; width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; }
+@keyframes crt-blink { 50% { opacity: 0; } }
+@keyframes crt-roll { to { top: 110%; } }
+@keyframes crt-flicker { 0%, 100% { opacity: 1; } 47% { opacity: 1; } 48% { opacity: .93; } 49% { opacity: 1; } 82% { opacity: .97; } }
+@media (prefers-reduced-motion: reduce) { .crt-screen, .crt-screen::after, .crt-cur { animation: none; } }
+@media (max-width: 1250px) { .hero-grid { grid-template-columns: 1fr; } .crt { justify-self: start; } }
+@media (max-width: 640px) { .crt { width: 100%; } }
 
 /* ---------------- main: chapter view ---------------- */
 .chhead .num { font-family: var(--display); font-weight: 900; font-size: 15px; letter-spacing: .2em; color: var(--cyan); }
