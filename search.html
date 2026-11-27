@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
   <link rel="stylesheet" href="assets/css/site.css">
 </head>
-<body>
+<body data-page="search" data-root="">
   <nav class="topnav" aria-label="Site">
     <div class="wrap topnav-row">
       <a class="home-btn" href="index.html"><span aria-hidden="true">⌂</span> Home</a>
@@ -40,6 +40,7 @@
   <script src="assets/js/slides.js"></script>
   <script src="assets/js/slide-text.js"></script>
   <script src="assets/js/manifest.js"></script>
+  <script src="assets/js/nav.js"></script>
   <script>
   /* Search over four kinds of item, all built in the browser (works from file:// — no fetch):
        hw    — one per homework problem   (ch<N>/hw/<set>/data.js, loaded with <script> tags)
@@ -55,7 +56,6 @@
     const params = new URLSearchParams(location.search);
     const st = { q: params.get("q") || "", tags: (params.get("tag") || "").split(",").filter(Boolean), type: params.get("type") || "all", ch: params.get("ch") || "all", sec: params.get("sec") || "all" };
     const CHS = window.CHAPTERS || [];
-    document.getElementById("nav-chapters").innerHTML = CHS.map((c) => `<a href="${c.dir}/index.html">Ch. ${c.ch} · ${esc(c.title)}</a>`).join("");
     const items = [];
 
     // ---- LaTeX → searchable plain text (keeps words like "ln", "sin", "sum"; drops markup)

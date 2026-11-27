@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Outline · Stewart Calculus · MAT 231</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" href="assets/img/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/css/site.css">
+</head>
+<!-- Stewart chapter / section outline. Data: assets/js/outline.js. Course chapters (assets/js/chapters.js) are highlighted and link to their hubs.
+     outline.html?view=course shows only the course chapters; &extras=0 hides projects, reviews and Problems Plus. -->
+<body id="top" data-page="outline" data-root="">
+  <nav class="topnav" aria-label="Site">
+    <div class="wrap topnav-row">
+      <a class="home-btn" href="index.html"><span aria-hidden="true">⌂</span> Home</a>
+      <span class="topnav-links" id="nav-chapters"></span>
+      <a class="topnav-repo" href="https://github.com/N-Herling-Mk1/MAT_231_Calc_II" target="_blank" rel="noopener" title="Source repository on GitHub (new tab)">Repo ↗</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div class="sigil" aria-hidden="true">§</div>
+      <div>
+        <div class="kicker">MAT 231 · Calculus II · Textbook map</div>
+        <h1>Outline <b>//</b> <span id="book">Stewart</span></h1>
+        <p class="lede">Chapters and sections of the textbook, with page numbers. The chapters this course covers are highlighted and link to their hubs. Section numbers in a loaded chapter search that section's homework, quizzes and slides.</p>
+        <div class="readout" id="readout">SYS //</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" id="main">
+    <div class="ol-bar">
+      <span class="lbl">Show</span>
+      <span class="filters" style="margin:0"><button type="button" class="fbtn" data-view="all">Full book</button><button type="button" class="fbtn" data-view="course">Course chapters</button></span>
+      <span class="lbl">Rows</span>
+      <span class="filters" style="margin:0"><button type="button" class="fbtn" data-extras="1">Sections + projects &amp; reviews</button><button type="button" class="fbtn" data-extras="0">Sections only</button></span>
+    </div>
+    <div class="ol-grid" id="grid"></div>
+  </main>
+
+  <footer class="wrap foot" id="foot">MAT 231 study hub · outline transcribed from the textbook's table of contents for personal study.</footer>
+
+  <script src="assets/js/chapters.js"></script>
+  <script src="assets/js/slides.js"></script>
+  <script src="assets/js/manifest.js"></script>
+  <script src="assets/js/outline.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script>
+  (function () {
+    const O = window.STEWART_OUTLINE;
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const course = new Map((window.CHAPTERS || []).map((c) => [String(c.ch), c]));
+    const qs = new URLSearchParams(location.search);
+    const st = { view: qs.get("view") === "course" ? "course" : "all", extras: qs.get("extras") === "0" ? "0" : "1" };
+    const pg = (p) => (p === null || p === undefined ? "—" : esc(p));
+
+    document.getElementById("book").textContent = O.book;
+    document.getElementById("foot").textContent = `MAT 231 study hub · ${O.book} · ${O.source}`;
+
+    document.getElementById("grid").innerHTML = O.chapters.map((c) => {
+      const cc = course.get(String(c.ch));
+      const loaded = cc && window.CH.loaded(cc.ch);
+      const head = c.ch === "A" ? "App." : `Ch. ${c.ch}`;
+      const rows = c.items.map(([k, num, title, page]) => {
+        if (k === "n") return `<li class="nt">${esc(title)}</li>`;
+        if (k === "s") {
+          const t = loaded ? `<a href="search.html?ch=${cc.ch}&amp;sec=${encodeURIComponent(num.replace("*", ""))}" title="Search ${esc(num)} in this site">${esc(title)}</a>` : esc(title);
+          return `<li class="s"><span class="n">${esc(num)}</span><span>${t}</span><span class="pg">${pg(page)}</span></li>`;
+        }
+        if (k === "p") return `<li class="p"><span class="n">${esc(num.replace(" Project", ""))}</span><span>${esc(title)}</span><span class="pg">${pg(page)}</span></li>`;
+        return `<li class="${k}"><span class="n"></span><span>${esc(title)}</span><span class="pg">${pg(page)}</span></li>`;
+      }).join("");
+      const nsec = c.items.filter((it) => it[0] === "s").length;
+      return `<section class="ol-ch${cc ? " course" : ""}" id="ch-${c.ch}">
+        <div class="ol-head"><span class="ol-num">${head}</span><h3>${esc(c.title)}</h3><span class="ol-pg">p. ${pg(c.page)}</span></div>
+        ${c.subtitle ? `<p class="ol-sub">${esc(c.subtitle)}</p>` : ""}
+        <div class="ol-tags"><span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${nsec} sections</span>${cc ? `<span class="ol-course">MAT 231</span><a class="ol-hub${loaded ? "" : " pending"}" href="${cc.dir}/index.html">${loaded ? "Open hub →" : "Hub · not loaded yet →"}</a>` : ""}</div>
+        ${c.flag ? `<div class="ol-flag">⚠ ${esc(c.flag)}</div>` : ""}
+        <ul class="ol-list">${rows}</ul>
+      </section>`;
+    }).join("");
+
+    const ncourse = O.chapters.filter((c) => course.has(String(c.ch)));
+    const nsecs = ncourse.reduce((t, c) => t + c.items.filter((it) => it[0] === "s").length, 0);
+    document.getElementById("readout").textContent =
+      `SYS // ${O.chapters.length - 1} chapters + appendixes · course: Ch. ${ncourse.map((c) => c.ch).join(", ")} · ${nsecs} course sections · ${ncourse.filter((c) => window.CH.loaded(c.ch)).length} loaded on this site`;
+
+    const main = document.getElementById("main");
+    const apply = () => {
+      main.classList.toggle("ol-course-only", st.view === "course");
+      main.classList.toggle("ol-hide-extra", st.extras === "0");
+      document.querySelectorAll("[data-view]").forEach((b) => b.classList.toggle("on", b.dataset.view === st.view));
+      document.querySelectorAll("[data-extras]").forEach((b) => b.classList.toggle("on", b.dataset.extras === st.extras));
+      const u = new URLSearchParams(); if (st.view === "course") u.set("view", "course"); if (st.extras === "0") u.set("extras", "0");
+      history.replaceState(null, "", location.pathname + (u.toString() ? "?" + u : "") + location.hash);
+    };
+    document.querySelectorAll("[data-view]").forEach((b) => (b.onclick = () => { st.view = b.dataset.view; apply(); }));
+    document.querySelectorAll("[data-extras]").forEach((b) => (b.onclick = () => { st.extras = b.dataset.extras; apply(); }));
+    apply();
+    if (location.hash) { const el = document.querySelector(location.hash); if (el) el.scrollIntoView(); }
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chapter · MAT 231</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32.png">
+  <link rel="icon" href="../assets/img/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<!-- Chapter hub. The same page sits in every chapter folder; only data-ch changes. -->
+<body id="top" data-ch="8" data-page="ch" data-root="../">
+  <nav class="topnav" aria-label="Site">
+    <div class="wrap topnav-row">
+      <a class="home-btn" href="../index.html" title="All chapters"><span aria-hidden="true">⌂</span> Home</a>
+      <span class="topnav-links" id="nav-chapters"></span>
+      <form class="searchbox" action="../search.html" role="search">
+        <label class="sr-only" for="q">Search problems, quizzes and slides</label>
+        <input id="q" name="q" type="search" placeholder="search: ratio test, telescoping, #p-series…" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+      <a class="topnav-repo" href="https://github.com/N-Herling-Mk1/MAT_231_Calc_II" target="_blank" rel="noopener" title="Source repository on GitHub (new tab)">Repo ↗</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div class="sigil" aria-hidden="true">∑</div>
+      <div>
+        <div class="kicker" id="kicker">MAT 231 · Calculus II</div>
+        <h1 id="ch-title">Chapter</h1>
+        <p class="lede" id="ch-blurb"></p>
+        <div class="ch-secs-outline" id="ch-secs" aria-label="Textbook sections"></div>
+        <nav class="topnav-sub" aria-label="On this page" style="margin-top:14px">
+          <a href="#col-quizzes">Slide quizzes</a>
+          <a href="#col-slides">Slides</a>
+          <a href="#col-hw">Homework</a>
+          <a href="#col-review">Review</a>
+        </nav>
+        <div class="readout" id="readout">SYS //</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap columns">
+    <section class="col" id="col-quizzes">
+      <div class="col-head"><h2>Slide quizzes</h2><p id="quiz-count">one per deck · graded on the spot</p></div>
+      <div class="cards" id="quizzes"></div>
+    </section>
+    <section class="col c-slides" id="col-slides">
+      <div class="col-head"><h2>Slides</h2><p id="slide-count">as handed out · PDF</p></div>
+      <div class="cards" id="slides"></div>
+    </section>
+    <section class="col c-hw" id="col-hw">
+      <div class="col-head"><h2>Homework</h2><p id="hw-count">WebAssign · blind / answers / work</p></div>
+      <div class="cards" id="hw"></div>
+    </section>
+    <section class="col c-review" id="col-review">
+      <div class="col-head"><h2>Review &amp; handouts</h2><p id="review-count">problem sets, class quizzes, guides</p></div>
+      <div class="cards" id="review"></div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">MAT 231 study hub · static HTML/CSS/JS, no build step · math by KaTeX · progress is kept in this browser only (localStorage).</footer>
+
+  <script src="../assets/js/chapters.js"></script>
+  <script src="../assets/js/slides.js"></script>
+  <script src="../assets/js/manifest.js"></script>
+  <script src="../assets/js/outline.js"></script>
+  <script src="../assets/js/nav.js"></script>
+  <script src="../assets/js/hub.js"></script>
+</body>
+</html>

@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="stylesheet" href="assets/css/site.css">
 </head>
-<body id="top">
+<body id="top" data-page="home" data-root="">
   <nav class="topnav" aria-label="Site">
     <div class="wrap topnav-row">
       <a class="home-btn" href="index.html" aria-current="page"><span aria-hidden="true">⌂</span> Home</a>
@@ -45,6 +45,8 @@
   <script src="assets/js/chapters.js"></script>
   <script src="assets/js/slides.js"></script>
   <script src="assets/js/manifest.js"></script>
+  <script src="assets/js/outline.js"></script>
+  <script src="assets/js/nav.js"></script>
   <script>
   (function () {
     const M = window.MANIFEST || { hw: [], quizzes: [] };
@@ -61,7 +63,6 @@
     const pl = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 
     let all = { q: 0, qd: 0, p: 0, pd: 0, pdf: 0 };
-    document.getElementById("nav-chapters").innerHTML = window.CHAPTERS.map((c) => `<a href="${c.dir}/index.html">Ch. ${c.ch}</a>`).join("") + `<a href="search.html">Search</a>`;
 
     document.getElementById("chapters").innerHTML = window.CHAPTERS.map((c) => {
       const hw = M.hw.filter((h) => h.ch === c.ch), qz = M.quizzes.filter((q) => q.ch === c.ch), sl = SLIDES.filter((d) => d.ch === c.ch);
@@ -72,31 +73,35 @@
       // most frequent tags across the chapter's quizzes, homework and decks
       const tc = {}; [...qz, ...hw].forEach((x) => (x.topics || []).forEach((t) => (tc[t] = (tc[t] || 0) + 1))); decks.forEach((d) => d.tags.forEach((t) => (tc[t] = (tc[t] || 0) + 1)));
       const tags = Object.keys(tc).sort((a, b) => tc[b] - tc[a] || a.localeCompare(b)).slice(0, 10);
-      const secs = decks.map((d) => d.sec);
+      const loaded = window.CH.loaded(c.ch);
+      // loaded chapters list the sections that have decks; empty chapters list the textbook's sections (assets/js/outline.js)
+      const secs = loaded ? decks.map((d) => d.sec) : (window.OUTLINE ? window.OUTLINE.sections(c.ch).map((s) => s.num) : []);
       const go = `${c.dir}/index.html`;
-      return `<article class="chcard">
-        <div class="ch-top"><span class="ch-num">Ch. ${c.ch}</span>${c.exam ? `<span class="ch-exam">${esc(c.exam)}</span>` : ""}</div>
+      return `<article class="chcard${loaded ? "" : " pending"}">
+        <div class="ch-top"><span class="ch-num">Ch. ${c.ch}</span>${c.exam ? `<span class="ch-exam">${esc(c.exam)}</span>` : ""}${loaded ? "" : `<span class="ch-pend">not loaded yet</span>`}</div>
         <h3 class="ch-title"><a class="ch-go" href="${go}">${esc(c.title)}</a></h3>
         <p class="ch-blurb">${esc(c.blurb)}</p>
         <div class="ch-secs">${secs.map((s) => `<span>${esc(s)}</span>`).join("")}</div>
-        <div class="ch-stats">
+        ${loaded ? "" : `<p class="ch-blurb" style="font-family:var(--mono);font-size:12.5px;color:var(--muted)">${esc(window.OUTLINE ? window.OUTLINE.sections(c.ch).map((x) => x.title).join(" · ") : "")}</p>`}
+        <div class="ch-stats"${loaded ? "" : " hidden"}>
           <a href="${go}#col-quizzes" class="st s-quiz"><b>${qz.filter((q) => q.kind === "quiz").length}</b><span>slide quizzes</span><i>${nq} questions</i></a>
           <a href="${go}#col-slides" class="st s-slides"><b>${decks.length}</b><span>slide decks</span><i>${decks.reduce((t, d) => t + d.pages, 0)} pages</i></a>
           <a href="${go}#col-hw" class="st s-hw"><b>${hw.length}</b><span>homework sets</span><i>${np} problems</i></a>
           <a href="${go}#col-review" class="st s-review"><b>${extra.length}</b><span>review &amp; problem sets</span><i>${pl(extra.filter((d) => d.kind === "problems").length, "problem set")}</i></a>
         </div>
-        <div class="ch-prog">
+        <div class="ch-prog"${loaded ? "" : " hidden"}>
           <span class="lbl">Quiz questions answered</span><span class="bar"><i style="width:${pct(qd, nq)}%"></i></span><span class="num">${qd} / ${nq}</span>
           <span class="lbl">Homework marked got-it</span><span class="bar hw"><i style="width:${pct(pd, np)}%"></i></span><span class="num">${pd} / ${np}</span>
         </div>
         <div class="ch-tags">${tags.map((t) => `<a href="search.html?ch=${c.ch}&amp;tag=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("")}</div>
-        <div class="ch-actions"><a class="go" href="${go}">Open chapter →</a></div>
+        <div class="ch-actions"><a class="go" href="${go}">${loaded ? "Open chapter" : "Open chapter hub"} →</a>${loaded ? "" : ` &nbsp; <a class="go" style="position:relative;z-index:2;color:var(--violet-ink)" href="outline.html#ch-${c.ch}">Outline →</a>`}</div>
       </article>`;
     }).join("");
 
     const n = window.CHAPTERS.length;
-    document.getElementById("ch-count").textContent = `${n} chapter${n === 1 ? "" : "s"} loaded · more added as they are covered`;
-    document.getElementById("readout").textContent = `SYS // ${n} chapter${n === 1 ? "" : "s"} · ${all.q} quiz questions · ${all.qd} answered here · ${all.p} homework problems · ${all.pd} marked got-it · ${all.pdf} PDFs`;
+    const nl = window.CHAPTERS.filter((c) => window.CH.loaded(c.ch)).length;
+    document.getElementById("ch-count").innerHTML = `${n} course chapters · ${nl} loaded · more added as they are covered · <a href="outline.html">full textbook outline →</a>`;
+    document.getElementById("readout").textContent = `SYS // ${n} chapters · ${nl} loaded · ${all.q} quiz questions · ${all.qd} answered here · ${all.p} homework problems · ${all.pd} marked got-it · ${all.pdf} PDFs`;
   })();
   </script>
 </body>

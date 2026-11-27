@@ -34,7 +34,9 @@
   document.getElementById("kicker").textContent = `MAT 231 · Calculus II · Chapter ${CHN}`;
   document.getElementById("ch-title").innerHTML = `Ch. ${CHN} <b>//</b> ${esc(C.title)}`;
   document.getElementById("ch-blurb").textContent = `${C.blurb} Sections ${C.sections}${C.exam ? ` · ${C.exam}` : ""}.`;
-  document.getElementById("ch-tabs").innerHTML = `<a href="${UP}index.html">All chapters</a>` +
+  // chapter switching lives in the top-nav buttons (assets/js/nav.js); older hub pages may still carry #ch-tabs
+  const tabs = document.getElementById("ch-tabs");
+  if (tabs) tabs.innerHTML = `<a href="${UP}index.html">All chapters</a>` +
     window.CHAPTERS.map((c) => c.ch === CHN ? `<span class="on" aria-current="page">Ch. ${c.ch} · ${esc(c.title)}</span>` : `<a href="${UP}${c.dir}/index.html">Ch. ${c.ch} · ${esc(c.title)}</a>`).join("");
 
   // the search box on a chapter hub searches that chapter (the search page can widen it to all chapters)
@@ -96,6 +98,19 @@
       <span class="meta">${d.pages} pages${q ? ` · ${q.total}-question practice quiz` : ""}${done ? ` · ${done} answered` : ""}</span>
       <span class="actions"><a class="go" href="${q ? q.href : view}">${q ? "Practice quiz" : "View"} →</a>
         ${q ? `<a class="dl" href="${view}" title="The original PDF in the viewer">Slides</a>` : newTab(view, d.title)}${pdf}</span>`);
+  });
+
+  // textbook sections (assets/js/outline.js) under the chapter tabs; empty columns say so instead of sitting blank
+  const secBox = document.getElementById("ch-secs");
+  if (secBox && window.OUTLINE) {
+    const have = new Set([...SLIDES.map((d) => d.sec), ...M.hw.map((h) => h.sec), ...M.quizzes.map((q) => q.sec)]);
+    secBox.innerHTML = window.OUTLINE.sections(CHN).map((x) => `<span title="${esc(x.title)}${x.page ? " · p. " + x.page : ""}"${have.has(x.num) ? ' style="background:var(--cyan-wash)"' : ""}>${esc(x.num)} ${esc(x.title)}</span>`).join("") +
+      `<span style="border-style:dashed"><a href="${UP}outline.html#ch-${CHN}" style="text-decoration:none;color:inherit">full outline →</a></span>`;
+  }
+  const loaded = SLIDES.length + M.hw.length + M.quizzes.length > 0;
+  [["quizzes", "No slide quizzes yet."], ["slides", "No slide decks yet."], ["hw", "No homework sets yet."], ["review", "No problem sets or handouts yet."]].forEach(([id, msg]) => {
+    const box = document.getElementById(id);
+    if (box && !box.children.length) box.innerHTML = `<div class="empty">${msg}${loaded ? "" : ` Chapter ${CHN} is not loaded yet; it fills in as the course covers it.`}</div>`;
   });
 
   const nq = M.quizzes.reduce((t, q) => t + q.total, 0), np = M.hw.reduce((t, h) => t + h.problems, 0);
