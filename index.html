@@ -4,43 +4,43 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MAT 231 · Calculus II · Study Hub</title>
+  <meta name="theme-color" content="#05090d">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
   <link rel="icon" href="assets/img/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
-  <link rel="stylesheet" href="assets/css/site.css">
+  <link rel="stylesheet" href="assets/css/home-dark.css">
 </head>
-<body id="top" data-page="home" data-root="">
-  <nav class="topnav" aria-label="Site">
-    <div class="wrap topnav-row">
-      <a class="home-btn" href="index.html" aria-current="page"><span aria-hidden="true">⌂</span> Home</a>
-      <span class="topnav-links" id="nav-chapters"></span>
-      <form class="searchbox" action="search.html" role="search">
-        <label class="sr-only" for="q">Search problems, quizzes and slides</label>
-        <input id="q" name="q" type="search" placeholder="search: ratio test, telescoping, #p-series…" autocomplete="off">
-        <button type="submit">Search</button>
-      </form>
-      <a class="topnav-repo" href="https://github.com/N-Herling-Mk1/MAT_231_Calc_II" target="_blank" rel="noopener" title="Source repository on GitHub (new tab)" aria-label="Source repository on GitHub (new tab)"><svg class="gh-mark" viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg><span>Repo ↗</span></a>
-    </div>
-  </nav>
+<!-- Course home (dark). Tiles across the top pick a view: Overview (course summary on the left) or a chapter
+     (that chapter's textbook outline on the left; stats and direct links on the right). index.html#ch-11 opens a chapter. -->
+<body>
+  <header class="bar">
+    <div class="bar-row">
+      <a class="brand" href="index.html" title="Course home"><span class="sig" aria-hidden="true">∑</span><span><b>MAT 231</b><i>CALCULUS II</i></span></a>
 
-  <header class="hero">
-    <div class="wrap hero-grid">
-      <div class="sigil" aria-hidden="true">∑</div>
-      <div>
-        <div class="kicker">Pima CC · Fall 2026 · Study hub</div>
-        <h1>MAT 231 <b>//</b> Calculus II</h1>
-        <p class="lede">Organized by chapter. Each chapter has the lecture slides as handed out, a quiz generated from every deck, problem sets with worked solutions, and the WebAssign homework transcribed with <b>blind</b>, <b>answers</b> and <b>worked-solution</b> views. Every problem, quiz question and slide page is searchable by keyword or tag.</p>
-        <div class="readout" id="readout">SYS //</div>
+      <div class="tilebar">
+        <button class="step" id="prev" type="button" title="Previous (←)" aria-label="Previous chapter">◀</button>
+        <div class="tiles" id="tiles" role="tablist" aria-label="Chapters"><span class="hl" id="hl" aria-hidden="true"></span></div>
+        <button class="step" id="next" type="button" title="Next (→)" aria-label="Next chapter">▶</button>
+        <label class="sr-only" for="pick">Chapter</label>
+        <select class="tilepick" id="pick"></select>
+      </div>
+
+      <div class="bar-right">
+        <a class="lnk" href="outline.html" title="Stewart chapter / section outline">Outline</a>
+        <form class="sbox" action="search.html" role="search">
+          <label class="sr-only" for="q">Search problems, quizzes and slides</label>
+          <input id="q" name="q" type="search" placeholder="search… #p-series" autocomplete="off">
+          <button type="submit">Search</button>
+        </form>
+        <a class="repo" href="https://github.com/N-Herling-Mk1/MAT_231_Calc_II" target="_blank" rel="noopener" title="Source repository on GitHub (new tab)" aria-label="Source repository on GitHub (new tab)"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg><span>Repo ↗</span></a>
       </div>
     </div>
   </header>
 
-  <main class="wrap">
-    <div class="col-head ch-head"><h2>Chapters</h2><p id="ch-count">pick a chapter</p></div>
-    <div class="chapters" id="chapters"></div>
-  </main>
-
-  <footer class="wrap foot">MAT 231 study hub · static HTML/CSS/JS, no build step · math by KaTeX · progress is kept in this browser only (localStorage).</footer>
+  <div class="layout">
+    <aside class="rail" id="rail" aria-live="polite"></aside>
+    <main class="main" id="main"></main>
+  </div>
 
   <script src="assets/js/chapters.js"></script>
   <script src="assets/js/slides.js"></script>
@@ -49,59 +49,161 @@
   <script src="assets/js/nav.js"></script>
   <script>
   (function () {
+    const CHS = window.CHAPTERS || [];
     const M = window.MANIFEST || { hw: [], quizzes: [] };
-    const SLIDES = window.SLIDE_DECKS || [];
+    const SL = window.SLIDE_DECKS || [];
+    const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const read = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+    const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
+    const pl = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
     const quizDone = (id, total) => {
       const s = read("quiz-state:" + id);
       if (!s || !s.answers) return 0;
       return Math.min(total, Object.values(s.answers).filter((a) => Array.isArray(a) ? a.length : a && typeof a === "object" ? Object.values(a).some(Boolean) : a !== null && a !== "").length);
     };
     const hwOk = (id) => { const s = read("hw-state:" + id); return s && s.marks ? Object.values(s.marks).filter((x) => x === "ok").length : 0; };
-    const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
-    const pl = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 
-    let all = { q: 0, qd: 0, p: 0, pd: 0, pdf: 0 };
-
-    document.getElementById("chapters").innerHTML = window.CHAPTERS.map((c) => {
-      const hw = M.hw.filter((h) => h.ch === c.ch), qz = M.quizzes.filter((q) => q.ch === c.ch), sl = SLIDES.filter((d) => d.ch === c.ch);
+    // ---- per-chapter numbers, computed once
+    const D = {};
+    CHS.forEach((c) => {
+      const hw = M.hw.filter((h) => h.ch === c.ch), qz = M.quizzes.filter((q) => q.ch === c.ch), sl = SL.filter((d) => d.ch === c.ch);
       const decks = sl.filter((d) => d.kind === "deck"), extra = sl.filter((d) => d.kind !== "deck");
       const nq = qz.reduce((t, q) => t + q.total, 0), qd = qz.reduce((t, q) => t + quizDone(q.id, q.total), 0);
       const np = hw.reduce((t, h) => t + h.problems, 0), pd = hw.reduce((t, h) => t + hwOk(h.id), 0);
-      all.q += nq; all.qd += qd; all.p += np; all.pd += pd; all.pdf += sl.length;
-      // most frequent tags across the chapter's quizzes, homework and decks
       const tc = {}; [...qz, ...hw].forEach((x) => (x.topics || []).forEach((t) => (tc[t] = (tc[t] || 0) + 1))); decks.forEach((d) => d.tags.forEach((t) => (tc[t] = (tc[t] || 0) + 1)));
-      const tags = Object.keys(tc).sort((a, b) => tc[b] - tc[a] || a.localeCompare(b)).slice(0, 10);
+      const tags = Object.keys(tc).sort((a, b) => tc[b] - tc[a] || a.localeCompare(b)).slice(0, 14);
       const loaded = window.CH.loaded(c.ch);
-      // loaded chapters list the sections that have decks; empty chapters list the textbook's sections (assets/js/outline.js)
-      const secs = loaded ? decks.map((d) => d.sec) : (window.OUTLINE ? window.OUTLINE.sections(c.ch).map((s) => s.num) : []);
-      const go = `${c.dir}/index.html`;
-      return `<article class="chcard${loaded ? "" : " pending"}">
-        <div class="ch-top"><span class="ch-num">Ch. ${c.ch}</span>${c.exam ? `<span class="ch-exam">${esc(c.exam)}</span>` : ""}${loaded ? "" : `<span class="ch-pend">not loaded yet</span>`}</div>
-        <h3 class="ch-title"><a class="ch-go" href="${go}">${esc(c.title)}</a></h3>
-        <p class="ch-blurb">${esc(c.blurb)}</p>
-        <div class="ch-secs">${secs.map((s) => `<span>${esc(s)}</span>`).join("")}</div>
-        ${loaded ? "" : `<p class="ch-blurb" style="font-family:var(--mono);font-size:12.5px;color:var(--muted)">${esc(window.OUTLINE ? window.OUTLINE.sections(c.ch).map((x) => x.title).join(" · ") : "")}</p>`}
-        <div class="ch-stats"${loaded ? "" : " hidden"}>
-          <a href="${go}#col-quizzes" class="st s-quiz"><b>${qz.filter((q) => q.kind === "quiz").length}</b><span>slide quizzes</span><i>${nq} questions</i></a>
-          <a href="${go}#col-slides" class="st s-slides"><b>${decks.length}</b><span>slide decks</span><i>${decks.reduce((t, d) => t + d.pages, 0)} pages</i></a>
-          <a href="${go}#col-hw" class="st s-hw"><b>${hw.length}</b><span>homework sets</span><i>${np} problems</i></a>
-          <a href="${go}#col-review" class="st s-review"><b>${extra.length}</b><span>review &amp; problem sets</span><i>${pl(extra.filter((d) => d.kind === "problems").length, "problem set")}</i></a>
-        </div>
-        <div class="ch-prog"${loaded ? "" : " hidden"}>
-          <span class="lbl">Quiz questions answered</span><span class="bar"><i style="width:${pct(qd, nq)}%"></i></span><span class="num">${qd} / ${nq}</span>
-          <span class="lbl">Homework marked got-it</span><span class="bar hw"><i style="width:${pct(pd, np)}%"></i></span><span class="num">${pd} / ${np}</span>
-        </div>
-        <div class="ch-tags">${tags.map((t) => `<a href="search.html?ch=${c.ch}&amp;tag=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("")}</div>
-        <div class="ch-actions"><a class="go" href="${go}">${loaded ? "Open chapter" : "Open chapter hub"} →</a>${loaded ? "" : ` &nbsp; <a class="go" style="position:relative;z-index:2;color:var(--violet-ink)" href="outline.html#ch-${c.ch}">Outline →</a>`}</div>
-      </article>`;
-    }).join("");
+      const secs = window.OUTLINE ? window.OUTLINE.sections(c.ch) : [];
+      const have = new Set([...sl.map((d) => d.sec), ...hw.map((h) => h.sec), ...qz.map((q) => q.sec)]);
+      D[c.ch] = { c, hw, qz, sl, decks, extra, nq, qd, np, pd, tags, loaded, secs, have, done: pct(qd + pd, nq + np) };
+    });
+    const T = Object.values(D).reduce((t, d) => ({ q: t.q + d.nq, qd: t.qd + d.qd, p: t.p + d.np, pd: t.pd + d.pd, pdf: t.pdf + d.sl.length, sec: t.sec + d.secs.length, ld: t.ld + (d.loaded ? 1 : 0) }),
+      { q: 0, qd: 0, p: 0, pd: 0, pdf: 0, sec: 0, ld: 0 });
 
-    const n = window.CHAPTERS.length;
-    const nl = window.CHAPTERS.filter((c) => window.CH.loaded(c.ch)).length;
-    document.getElementById("ch-count").innerHTML = `${n} course chapters · ${nl} loaded · more added as they are covered · <a href="outline.html">full textbook outline →</a>`;
-    document.getElementById("readout").textContent = `SYS // ${n} chapters · ${nl} loaded · ${all.q} quiz questions · ${all.qd} answered here · ${all.p} homework problems · ${all.pd} marked got-it · ${all.pdf} PDFs`;
+    // ---- tiles: Overview + one per chapter; the highlighter box slides to the selected one
+    const VIEWS = ["all", ...CHS.map((c) => String(c.ch))];
+    $("tiles").insertAdjacentHTML("beforeend", VIEWS.map((v) => {
+      if (v === "all") return `<button class="tile all" role="tab" id="t-all" data-v="all" aria-selected="false" title="Course overview"><span class="tn">∑ ALL</span><span class="tt">Overview</span><span class="tp"><i style="width:${pct(T.qd + T.pd, T.q + T.p)}%"></i></span></button>`;
+      const d = D[v];
+      return `<button class="tile${d.loaded ? "" : " pending"}" role="tab" id="t-${v}" data-v="${v}" aria-selected="false" title="Ch. ${v} · ${esc(d.c.title)}${d.loaded ? "" : " — not loaded yet"}"><span class="tn">CH ${v}</span><span class="tt">${esc(d.c.title)}</span><span class="tp">${d.loaded ? `<i style="width:${d.done}%"></i>` : ""}</span></button>`;
+    }).join(""));
+    $("pick").innerHTML = VIEWS.map((v) => `<option value="${v}">${v === "all" ? "Overview — all chapters" : `Ch. ${v} · ${esc(D[v].c.title)}`}</option>`).join("");
+
+    const moveHl = () => {
+      const t = document.querySelector('.tile[aria-selected="true"]'), hl = $("hl");
+      if (!t) return;
+      hl.style.left = t.offsetLeft + "px"; hl.style.width = t.offsetWidth + "px";
+      const box = $("tiles");
+      if (t.offsetLeft < box.scrollLeft || t.offsetLeft + t.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollLeft = t.offsetLeft - 40;
+    };
+
+    // ---- left rail
+    function railSummary() {
+      return `<div class="fade"><div class="k">Course summary</div><h2>Calculus II</h2>
+        <p class="sub">Stewart Ch. ${CHS.map((c) => c.ch).join(", ")} · ${T.sec} sections · ${T.ld} of ${CHS.length} loaded</p>
+        <div class="sum-tot"><div><b>${T.q}</b><span>quiz questions</span></div><div><b>${T.p}</b><span>homework problems</span></div><div><b>${T.pdf}</b><span>PDFs</span></div></div>
+        ${CHS.map((c) => { const d = D[c.ch]; return `<button class="sum-ch${d.loaded ? "" : " pending"}" type="button" data-go="${c.ch}">
+          <span class="h"><span class="n">CH ${c.ch}</span><span class="t">${esc(c.title)}</span><span class="st${d.loaded ? " ok" : ""}">${d.loaded ? `${d.done}% done` : "not loaded"}</span></span>
+          <p>${esc(c.blurb)}</p>
+          <span class="m">§ ${esc(c.sections)}${c.exam ? ` · ${esc(c.exam)}` : ""}${d.loaded ? ` · ${pl(d.decks.length, "deck")} · ${pl(d.hw.length, "HW set")} · ${d.qz.length} ${d.qz.length === 1 ? "quiz" : "quizzes"}` : ` · ${d.secs.length} sections in the text`}</span>
+        </button>`; }).join("")}</div>`;
+    }
+    function railOutline(n) {
+      const d = D[n], O = window.OUTLINE && window.OUTLINE.chapter(n);
+      if (!O) return `<div class="fade"><div class="k">Ch. ${n} outline</div><p class="sub">No outline on file.</p></div>`;
+      const rows = O.items.map(([k, num, title, page]) => {
+        const pg = page === null || page === undefined ? "—" : esc(page);
+        if (k === "n") return `<li class="nt">${esc(title)}</li>`;
+        if (k === "s") {
+          const has = d.have.has(num);
+          const t = d.loaded ? `<a href="search.html?ch=${n}&amp;sec=${encodeURIComponent(num.replace("*", ""))}" title="Search ${esc(num)}">${esc(title)}</a>` : esc(title);
+          return `<li class="s${has ? " has" : ""}"><span class="n">${esc(num)}</span><span>${t}</span><span class="pg">${pg}</span></li>`;
+        }
+        if (k === "p") return `<li class="p"><span class="n">${esc(num.replace(" Project", ""))}</span><span>${esc(title)}</span><span class="pg">${pg}</span></li>`;
+        return `<li class="${k}"><span class="n"></span><span>${esc(title)}</span><span class="pg">${pg}</span></li>`;
+      }).join("");
+      return `<div class="fade"><div class="k">Textbook outline · Ch. ${n}</div><h2>${esc(O.title)}</h2>
+        <p class="sub">${O.subtitle ? esc(O.subtitle) + " · " : ""}${esc(window.STEWART_OUTLINE.book)} · p. ${O.page ?? "—"}</p>
+        ${O.flag ? `<div class="flag">⚠ ${esc(O.flag)}</div>` : ""}
+        ${d.loaded ? `<p class="legend"><b>●</b> section has slides, homework or a quiz here · click a title to search it</p>` : ""}
+        <ul class="ol">${rows}</ul>
+        <a class="more" href="outline.html#ch-${n}">Full textbook outline →</a></div>`;
+    }
+
+    // ---- main area
+    function mainOverview() {
+      return `<div class="fade"><section class="hero"><div class="k">Pima CC · Fall 2026 · Study hub</div>
+        <h1>MAT 231 <b>//</b> Calculus II</h1>
+        <p>Organized by chapter. Each chapter has the lecture slides as handed out, a quiz generated from every deck, problem sets with worked solutions, and the WebAssign homework transcribed with blind, answers and worked-solution views. Everything is searchable by keyword or tag.</p>
+        <div class="readout">SYS // ${CHS.length} chapters · ${T.ld} loaded · ${T.q} quiz questions · ${T.qd} answered here · ${T.p} homework problems · ${T.pd} marked got-it · ${T.pdf} PDFs</div></section>
+        <div class="grid">${CHS.map((c) => { const d = D[c.ch]; return `<div class="cc${d.loaded ? "" : " pending"}" role="button" tabindex="0" data-go="${c.ch}" title="Show Ch. ${c.ch}">
+          <div class="top"><span class="num">CH ${c.ch}</span>${c.exam ? `<span class="badge exam">${esc(c.exam)}</span>` : d.loaded ? "" : `<span class="badge">not loaded yet</span>`}</div>
+          <h3>${esc(c.title)}</h3><p>${esc(c.blurb)}</p>
+          <span class="m">§ ${esc(c.sections)}${d.loaded ? ` · ${d.nq} quiz Qs · ${d.np} HW problems · ${d.sl.length} PDFs` : ` · ${d.secs.length} sections`}</span>
+          ${d.loaded ? `<span class="pb"><i style="width:${d.done}%"></i></span>` : ""}
+        </div>`; }).join("")}</div></div>`;
+    }
+    function mainChapter(n) {
+      const d = D[n], c = d.c, go = `${c.dir}/index.html`;
+      const head = `<section class="chhead"><div class="num">CHAPTER ${n}</div><h1>${esc(c.title)}</h1><p>${esc(c.blurb)}</p>
+        <div class="meta">§ ${esc(c.sections)}${c.exam ? ` · <span class="exam">${esc(c.exam)}</span>` : ""}${d.loaded ? ` · ${d.done}% worked through in this browser` : " · not loaded yet"}</div></section>
+        <div class="acts"><a class="btn" href="${go}">Open chapter hub →</a><a class="btn ghost" href="outline.html#ch-${n}">Textbook outline</a>${d.loaded ? `<a class="btn ghost" href="search.html?ch=${n}">Search Ch. ${n}</a>` : ""}</div>`;
+      if (!d.loaded) return `<div class="fade">${head}<div class="pendbox"><b>Nothing loaded for Chapter ${n} yet.</b> Slides, homework and quizzes appear here as the course covers it. The textbook outline for the chapter is on the left; the hub page is ready at <code>${esc(go)}</code>.</div></div>`;
+      const row = (href, sec, title, extra) => `<a class="row" href="${href}"><span class="s">${esc(sec)}</span><span>${esc(title)}<span class="x">${extra}</span></span></a>`;
+      const col = (cls, h, rows) => `<div class="col ${cls}"><h4>${h}</h4>${rows.length ? rows.join("") : `<div class="empty">none yet</div>`}</div>`;
+      return `<div class="fade">${head}
+        <div class="stats">
+          <a class="stat a-quiz" href="${go}#col-quizzes"><b>${d.qz.filter((q) => q.kind === "quiz").length}</b><span>slide quizzes</span><i>${d.nq} questions</i></a>
+          <a class="stat a-slides" href="${go}#col-slides"><b>${d.decks.length}</b><span>slide decks</span><i>${d.decks.reduce((t, x) => t + x.pages, 0)} pages</i></a>
+          <a class="stat a-hw" href="${go}#col-hw"><b>${d.hw.length}</b><span>homework sets</span><i>${d.np} problems</i></a>
+          <a class="stat a-review" href="${go}#col-review"><b>${d.extra.length}</b><span>review &amp; problem sets</span><i>${pl(d.extra.filter((x) => x.kind === "problems").length, "problem set")}</i></a>
+        </div>
+        <div class="prog"><span class="l">Quiz questions answered</span><span class="b"><i style="width:${pct(d.qd, d.nq)}%"></i></span><span class="v">${d.qd} / ${d.nq}</span>
+          <span class="l">Homework marked got-it</span><span class="b hw"><i style="width:${pct(d.pd, d.np)}%"></i></span><span class="v">${d.pd} / ${d.np}</span></div>
+        <div class="tags">${d.tags.map((t) => `<a href="search.html?ch=${n}&amp;tag=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("")}</div>
+        <div class="cols">
+          ${col("a-quiz", "Slide quizzes", d.qz.filter((q) => q.kind === "quiz").map((q) => row(`${c.dir}/${q.href}`, q.sec, q.title, `${q.total} questions${quizDone(q.id, q.total) ? ` · ${quizDone(q.id, q.total)} answered` : ""}`)))}
+          ${col("a-slides", "Slides", d.decks.map((x) => row(`viewer.html?d=${x.key}`, x.sec, x.title, `${x.pages} pages${x.ans ? " · answers version" : ""}`)))}
+          ${col("a-hw", "Homework", d.hw.map((h) => row(`${c.dir}/${h.href}`, h.sec, h.title, `${h.problems} problems${hwOk(h.id) ? ` · ${hwOk(h.id)} got it` : ""}`)))}
+          ${col("a-review", "Review", [...d.extra.map((x) => row(`viewer.html?d=${x.key}`, x.sec, x.title, `${x.kind === "problems" ? "problem set" : x.kind === "review" ? "class quiz" : "handout"} · ${x.pages} pages`)),
+            ...d.qz.filter((q) => q.kind !== "quiz").map((q) => row(`${c.dir}/${q.href}`, q.sec, q.title, `practice quiz · ${q.total} questions`))])}
+        </div></div>`;
+    }
+
+    // ---- selection
+    let cur = "all";
+    function show(v, push) {
+      if (!VIEWS.includes(v)) v = "all";
+      cur = v;
+      document.querySelectorAll(".tile").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.v === v)));
+      $("pick").value = v;
+      $("rail").innerHTML = v === "all" ? railSummary() : railOutline(Number(v));
+      $("rail").scrollTop = 0;
+      $("main").innerHTML = v === "all" ? mainOverview() : mainChapter(Number(v));
+      document.title = v === "all" ? "MAT 231 · Calculus II · Study Hub" : `Ch. ${v} · ${D[v].c.title} · MAT 231`;
+      if (push) history.replaceState(null, "", v === "all" ? location.pathname : "#ch-" + v);
+      requestAnimationFrame(moveHl);
+    }
+    const step = (k) => show(VIEWS[(VIEWS.indexOf(cur) + k + VIEWS.length) % VIEWS.length], true);
+
+    $("tiles").addEventListener("click", (e) => { const t = e.target.closest(".tile"); if (t) show(t.dataset.v, true); });
+    $("prev").addEventListener("click", () => step(-1));
+    $("next").addEventListener("click", () => step(1));
+    $("pick").addEventListener("change", (e) => show(e.target.value, true));
+    document.addEventListener("click", (e) => { const g = e.target.closest("[data-go]"); if (g) show(g.dataset.go, true); });
+    document.addEventListener("keydown", (e) => {
+      const tag = (e.target.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "select" || tag === "textarea" || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.key === "ArrowRight") { step(1); e.preventDefault(); }
+      else if (e.key === "ArrowLeft") { step(-1); e.preventDefault(); }
+      else if ((e.key === "Enter" || e.key === " ") && e.target.matches(".cc[data-go]")) { show(e.target.dataset.go, true); e.preventDefault(); }
+    });
+    window.addEventListener("resize", moveHl);
+    window.addEventListener("hashchange", () => show((location.hash.match(/^#ch-(\d+)$/) || [])[1] || "all", false));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(moveHl);
+
+    show((location.hash.match(/^#ch-(\d+)$/) || [])[1] || "all", false);
   })();
   </script>
 </body>

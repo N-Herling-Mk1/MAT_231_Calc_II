@@ -20,7 +20,10 @@ The course covers Stewart Chapters 6, 7, 8, 10 and 11; each has a button in the 
 Two levels: the **course home** (`index.html`) shows one card per chapter, and each **chapter folder** (`ch11/`, later `ch7/`, …) holds that chapter's hub page, PDFs, homework and quizzes. The slide viewer, the search page and all assets are shared at the root.
 
 ```
-index.html                  course home: one card per chapter (counts, progress, top tags) → chapter hub
+index.html                  course home (dark theme, assets/css/home-dark.css): chapter tiles across the top with a sliding
+                            highlighter (◀ ▶, ← → keys, or the select on narrow screens). Overview = course summary on the
+                            left + chapter cards; a chapter = its textbook outline on the left + stats, progress and direct
+                            links to every quiz, deck, homework set and review item. index.html#ch-11 opens a chapter
 outline.html                Stewart table of contents (all chapters, page numbers); course chapters highlighted → hubs
                             outline.html?view=course shows only the course chapters, &extras=0 hides projects/reviews
 search.html                 keyword + tag search over every chapter; filters for chapter, section and type
@@ -37,7 +40,8 @@ ch11/                       Chapter 11 — Sequences & Series
   quizzes/review-quiz-3-3/  practice version of class Quiz 3.3
   quizzes/review-quiz-3-4/  practice version of Review Quiz 3.4 (Exam 3 review)
 assets/
-  css/site.css              course home, chapter hubs, search and homework pages (TRON light)
+  css/home-dark.css         course home only (dark and sleek)
+  css/site.css              chapter hubs, outline, search and homework pages (TRON light)
   css/quiz.css              quiz pages and the viewer (D2L-style base from the CHEM 181 hub + TRON light override at the end)
   js/chapters.js            CHAPTERS: the chapter list (number, folder, title, sections, exam) — the top layer
   js/outline.js             STEWART_OUTLINE: the textbook's chapters / sections / page numbers (outline.html, section chips)
