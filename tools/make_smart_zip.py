@@ -6,7 +6,7 @@ the generated slide-text index, and the stale pre-chapter copies (root hw/, quiz
 listed, with its size, in SKELETON_INDEX.md inside the zip, so the chat knows what exists and where.
 
 Run from anywhere (stdlib only, Python 3.8+):
-    python tools/make_smart_zip.py                    # -> _skeleton/MAT_231_Calc_II_skeleton.zip
+    python tools/make_smart_zip.py                    # -> ../MAT_231_Calc_II_skeleton.zip (one level above the repo root)
     python tools/make_smart_zip.py --list             # dry run: print what would be kept / cut
     python tools/make_smart_zip.py --with-slide-text  # also keep assets/js/slide-text.js (page text of every PDF, ~110 KB)
     python tools/make_smart_zip.py --with-images      # also keep homework screenshots (large)
@@ -81,7 +81,8 @@ def git_rev():
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--out", default=str(ROOT / OUT_DIR / f"{NAME}_skeleton.zip"))
+    # default: beside the repo folder, never inside it (keeps the zip out of git and out of its own next scan)
+    ap.add_argument("--out", default=str(ROOT.parent / f"{NAME}_skeleton.zip"))
     ap.add_argument("--list", action="store_true", help="dry run: print the plan, write nothing")
     ap.add_argument("--with-slide-text", action="store_true")
     ap.add_argument("--with-images", action="store_true")

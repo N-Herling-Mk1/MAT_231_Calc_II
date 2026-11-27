@@ -348,3 +348,7 @@ table.tbl th { background: #f1f7f9; }
 .ol-course-only .ol-ch:not(.course) { display: none; }
 @media (max-width: 700px) { .ol-grid { grid-template-columns: 1fr; } .ol-list li { grid-template-columns: 48px minmax(0, 1fr) auto; } }
 .chcard [hidden] { display: none !important; }
+
+/* GitHub mark on the Repo button (top right) */
+.topnav-repo { display: inline-flex; align-items: center; gap: 8px; }
+.topnav-repo .gh-mark { flex: none; display: block; }

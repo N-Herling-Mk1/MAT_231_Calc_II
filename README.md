@@ -53,7 +53,6 @@ assets/
   vendor/fonts/             Orbitron + Share Tech Mono (SIL OFL)
 tools/                      page templates (chapter hub, homework, quiz), authoring helpers, the two generators,
                             and make_smart_zip.py (skeleton zip for chat uploads, below)
-_skeleton/                  MAT_231_Calc_II_skeleton.zip, written by tools/make_smart_zip.py
 hw/ quizzes/ slides/        STALE: copies of Ch. 11 from before the chapter layout. Nothing links to them; safe to delete
 ```
 
@@ -98,7 +97,7 @@ The top-bar buttons, the course home, the viewer's deck picker and the search fi
 
 ## Skeleton zip for chat uploads
 
-The full repo is ~40 MB, almost all of it PDFs, homework screenshots, and the stale root copies. `tools/make_smart_zip.py` writes `_skeleton/MAT_231_Calc_II_skeleton.zip` (~170 KB): every HTML, CSS and JS file, every homework and quiz `data.js`, the LaTeX sources, the tools and this README. It leaves out PDFs, images, the bundled KaTeX and fonts, `slide-text.js` (generated) and the stale `hw/ quizzes/ slides/` copies. `SKELETON_INDEX.md` inside the zip lists every left-out file with its path and size, so a chat still knows what exists.
+The full repo is ~40 MB, almost all of it PDFs, homework screenshots, and the stale root copies. `tools/make_smart_zip.py` writes `MAT_231_Calc_II_skeleton.zip` (~170 KB) one folder above the repo root, outside git: every HTML, CSS and JS file, every homework and quiz `data.js`, the LaTeX sources, the tools and this README. It leaves out PDFs, images, the bundled KaTeX and fonts, `slide-text.js` (generated) and the stale `hw/ quizzes/ slides/` copies. `SKELETON_INDEX.md` inside the zip lists every left-out file with its path and size, so a chat still knows what exists.
 
 ```
 python tools/make_smart_zip.py                    # build the zip
